@@ -208,8 +208,8 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
       // Process children if expanded
       if (hasChildren && isExpanded && employee.children) {
         employee.children.forEach((child, index) => {
-          // Get current employee's level colors for the connection line
-          const currentLevelColors = getLevelColor(employee.level);
+          // Get current employee's border color for the connection line
+          const currentCardColors = getCardBorderColor(employee.jobTitleCode, employee.level);
           
           // Create edge to child
           allEdges.push({
@@ -219,7 +219,7 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
             type: 'smoothstep',
             animated: false,
             style: {
-              stroke: currentLevelColors.borderColor,
+              stroke: currentCardColors.borderColor,
               strokeWidth: 4,
               strokeDasharray: '0',
             },
@@ -227,7 +227,7 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
               type: 'arrowclosed',
               width: 20,
               height: 20,
-              color: currentLevelColors.borderColor,
+              color: currentCardColors.borderColor,
             },
           });
 
