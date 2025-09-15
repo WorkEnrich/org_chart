@@ -168,7 +168,7 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
       processedCodes.add(employee.jobTitleCode);
 
       const minHorizontalSpacing = 350; // الحد الأدنى للمسافة الأفقية
-      const verticalSpacing = 280;      // مسافة عمودية
+      const verticalSpacing = 350;      // مسافة عمودية
       const cardWidth = 280;            // عرض الكارد تقريباً
       
       // Calculate position
@@ -183,7 +183,7 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
           x = parentX;
         } else {
           // حساب المسافة المطلوبة بناءً على عدد الأشقاء
-          const requiredSpacing = Math.max(minHorizontalSpacing, cardWidth + 50);
+          const requiredSpacing = Math.max(450, cardWidth + 100); // زيادة المسافة الأفقية
           const totalWidth = (totalSiblings - 1) * requiredSpacing;
           const startX = parentX - totalWidth / 2;
           x = startX + (siblingIndex * requiredSpacing);
@@ -194,7 +194,7 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
       const positionKey = `${level}-${Math.round(x / 50)}`;
       let attempts = 0;
       while (usedPositions.has(positionKey) && attempts < 10) {
-        x += cardWidth + 30; // إزاحة إضافية لتجنب التداخل
+        x += cardWidth + 80; // إزاحة إضافية أكبر لتجنب التداخل
         const newPositionKey = `${level}-${Math.round(x / 50)}`;
         if (!usedPositions.has(newPositionKey)) {
           break;
@@ -229,7 +229,7 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
       if (hasChildren && isExpanded && employee.children) {
         // حساب العرض الإجمالي المطلوب للأطفال
         const childrenCount = employee.children.length;
-        const childSpacing = Math.max(minHorizontalSpacing, cardWidth + 70);
+        const childSpacing = Math.max(500, cardWidth + 120); // مسافة أكبر بين الأطفال
         const totalChildrenWidth = (childrenCount - 1) * childSpacing;
         
         employee.children.forEach((child, index) => {
