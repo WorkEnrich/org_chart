@@ -233,27 +233,26 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
         const totalChildrenWidth = (childrenCount - 1) * childSpacing;
         
         employee.children.forEach((child, index) => {
-          // Get current employee's level colors for the connection line
-          const currentLevelColors = getLevelColor(employee.level);
-          
           // Create edge to child
           allEdges.push({
             id: `edge-${employee.jobTitleCode}-${child.jobTitleCode}`,
             source: employee.jobTitleCode.toString(),
             target: child.jobTitleCode.toString(),
-            type: 'smoothstep',
+            type: 'step',
             animated: false,
             style: {
-              stroke: currentLevelColors.borderColor,
-              strokeWidth: 4,
-              strokeDasharray: '0',
+              stroke: getLevelColor(employee.level).borderColor,
+              strokeWidth: 3,
+              strokeDasharray: '0'
             },
             markerEnd: {
               type: 'arrowclosed',
-              width: 20,
-              height: 20,
-              color: currentLevelColors.borderColor,
+              width: 15,
+              height: 15,
+              color: getLevelColor(employee.level).borderColor,
             },
+            sourceHandle: 'bottom',
+            targetHandle: 'top',
           });
 
           // Process child recursively
