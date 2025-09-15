@@ -159,15 +159,17 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
     const allNodes: Node[] = [];
     const allEdges: Edge[] = [];
     const processedCodes = new Set<number>();
-    const levelPositions = new Map<number, number>(); // تتبع المواضع في كل مستوى
+    const usedPositions = new Set<string>(); // تتبع المواضع المستخدمة
+    const levelCounts = new Map<number, number>(); // عدد العقد في كل مستوى
     
     // Function to recursively process employees
-    const processEmployee = (employee: Employee, level: number, parentX: number = 0, siblingIndex: number = 0, totalSiblings: number = 1, isRoot: boolean = false) => {
+    const processEmployee = (employee: Employee, level: number, parentX: number = 0, siblingIndex: number = 0, totalSiblings: number = 1, isRoot: boolean = false, parentWidth: number = 0) => {
       if (processedCodes.has(employee.jobTitleCode)) return;
       processedCodes.add(employee.jobTitleCode);
 
-      const horizontalSpacing = 400; // مسافة أفقية معقولة
-      const verticalSpacing = 300;   // مسافة عمودية معقولة
+      const minHorizontalSpacing = 350; // الحد الأدنى للمسافة الأفقية
+      const verticalSpacing = 280;      // مسافة عمودية
+      const cardWidth = 280;            // عرض الكارد تقريباً
       
       // Calculate position
       let x = parentX;
@@ -176,17 +178,30 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
         // الجذر في المنتصف
         x = 0;
       } else if (level > 1) {
-        // حساب الموضع بناءً على الأشقاء
         if (totalSiblings === 1) {
-          // إذا كان وحيد، ضعه تحت والده مباشرة
+          // إذا كان وحيد، ضعه تحت والده مباشرة مع إزاحة بسيطة لتجنب التداخل
           x = parentX;
         } else {
-          // توزيع الأشقاء حول والدهم
-          const totalWidth = (totalSiblings - 1) * horizontalSpacing;
+          // حساب المسافة المطلوبة بناءً على عدد الأشقاء
+          const requiredSpacing = Math.max(minHorizontalSpacing, cardWidth + 50);
+          const totalWidth = (totalSiblings - 1) * requiredSpacing;
           const startX = parentX - totalWidth / 2;
-          x = startX + (siblingIndex * horizontalSpacing);
+          x = startX + (siblingIndex * requiredSpacing);
         }
       }
+      
+      // التأكد من عدم التداخل مع العقد الموجودة
+      const positionKey = `${level}-${Math.round(x / 50)}`;
+      let attempts = 0;
+      while (usedPositions.has(positionKey) && attempts < 10) {
+        x += cardWidth + 30; // إزاحة إضافية لتجنب التداخل
+        const newPositionKey = `${level}-${Math.round(x / 50)}`;
+        if (!usedPositions.has(newPositionKey)) {
+          break;
+        }
+        attempts++;
+      }
+      usedPositions.add(`${level}-${Math.round(x / 50)}`);
       
       const y = (level - 1) * verticalSpacing;
 
@@ -212,6 +227,11 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
 
       // Process children if expanded
       if (hasChildren && isExpanded && employee.children) {
+        // حساب العرض الإجمالي المطلوب للأطفال
+        const childrenCount = employee.children.length;
+        const childSpacing = Math.max(minHorizontalSpacing, cardWidth + 70);
+        const totalChildrenWidth = (childrenCount - 1) * childSpacing;
+        
         employee.children.forEach((child, index) => {
           // Get current employee's level colors for the connection line
           const currentLevelColors = getLevelColor(employee.level);
@@ -237,7 +257,7 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
           });
 
           // Process child recursively
-          processEmployee(child, level + 1, x, index, employee.children!.length, false);
+          processEmployee(child, level + 1, x, index, employee.children!.length, false, totalChildrenWidth);
         });
       }
     };
