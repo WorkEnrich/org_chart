@@ -12,7 +12,7 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import { Employee } from '../types/Employee';
 import EmployeeNode from './EmployeeNode';
-import { getLevelColor } from '../utils/orgChartUtils';
+import { getLevelColor, getCardBorderColor } from '../utils/orgChartUtils';
 
 interface OrgChartProps {
   companyData: Employee | null;
