@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Organization Chart API</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Example usage script -->
+    <script>
+      // Wait for the OrgChart API to be ready
+      window.addEventListener('OrgChartReady', function() {
+        console.log('🎉 OrgChart API is ready! (API-Only Mode)');
+        console.log('📋 Available functions:');
+        console.log('- window.OrgChartAPI.init(companyData) - Initialize chart');
+        console.log('- window.OrgChartAPI.clearChart() - Clear chart');
+        console.log('- window.OrgChartAPI.updateCompanyData(data) - Update data');
+        console.log('- window.OrgChartAPI.searchEmployee(term) - Search');
+        console.log('- window.OrgChartAPI.filterByLevel(level) - Filter');
+        console.log('- window.OrgChartAPI.expandAll() - Expand all');
+        console.log('- window.OrgChartAPI.collapseAll() - Collapse all');
+        console.log('- window.OrgChartAPI.getStats() - Get statistics');
+        
+        // Listen to chart events
+        window.addEventListener('OrgChartInitialized', function(e) {
+          console.log('✅ Chart initialized:', e.detail);
+        });
+        
+        window.addEventListener('OrgChartUpdated', function(e) {
+          console.log('🔄 Chart updated:', e.detail);
+        });
+        
+        window.addEventListener('OrgChartCleared', function(e) {
+          console.log('🗑️ Chart cleared');
+        });
+        
+        window.addEventListener('OrgChartSearched', function(e) {
+          console.log('🔍 Search performed:', e.detail);
+        });
+        
+        window.addEventListener('OrgChartFiltered', function(e) {
+          console.log('🏢 Filter applied:', e.detail);
+        });
+        
+        window.addEventListener('OrgChartFiltersReset', function(e) {
+          console.log('🔄 Filters reset');
+        });
+
+        // Test functions for browser console
+        window.testCompany = function() {
+          console.log('🧪 Testing with company data...');
+          
+          const companyData = {
+            name: 'Ahmed Youssef',
+            position: 'CEO',
+            jobTitleCode: 101,
+            level: 'Executive',
+            expanded: false,
+            firstNode: true,
+            children: [
+              {
+                name: 'Laila Hassan',
+                position: 'CFO',
+                jobTitleCode: 102,
+                level: 'Senior Management',
+                expanded: false,
+                children: [
+                  {
+                    name: 'Mona Ali',
+                    position: 'Finance Manager',
+                    jobTitleCode: 103,
+                    level: 'Middle Management',
+                    expanded: false,
+                    children: []
+                  }
+                ]
+              },
+              {
+                name: 'Khaled Ibrahim',
+                position: 'COO',
+                jobTitleCode: 107,
+                level: 'Senior Management',
+                expanded: false,
+                children: [
+                  {
+                    name: 'Yasmine Adel',
+                    position: 'Operations Manager',
+                    jobTitleCode: 108,
+                    level: 'Middle Management',
+                    expanded: false,
+                    children: []
+                  }
+                ]
+              },
+              {
+                name: 'Ehab Farouk',
+                position: 'CTO',
+                jobTitleCode: 119,
+                level: 'Senior Management',
+                expanded: false,
+                children: [
+                  {
+                    name: 'Mostafa Emad',
+                    position: 'Engineering Manager',
+                    jobTitleCode: 120,
+                    level: 'Middle Management',
+                    expanded: false,
+                    children: []
+                  }
+                ]
+              }
+            ]
+          };
+          
+          window.OrgChartAPI.init(companyData);
+        };
+        
+        window.testSimple = function() {
+          console.log('🧪 Testing with simple data...');
+          
+          const simpleData = {
+            name: 'John Doe',
+            position: 'CEO',
+            jobTitleCode: 1,
+            level: 'Executive',
+            expanded: false,
+            firstNode: true,
+            children: []
+          };
+          
+          window.OrgChartAPI.init(simpleData);
+        };
+        
+        window.clearChart = function() {
+          console.log('🗑️ Clearing chart...');
+          window.OrgChartAPI.clearChart();
+        };
+        
+        // Additional test functions
+        window.testSearch = function() {
+          console.log('🔍 Testing search...');
+          window.OrgChartAPI.searchEmployee('Ahmed');
+        };
+        
+        window.testFilter = function() {
+          console.log('🏢 Testing level filter...');
+          window.OrgChartAPI.filterByLevel('Senior Management');
+        };
+        
+        window.testExpand = function() {
+          console.log('📈 Testing expand all...');
+          window.OrgChartAPI.expandAll();
+        };
+        
+        window.testCollapse = function() {
+          console.log('📉 Testing collapse all...');
+          window.OrgChartAPI.collapseAll();
+        };
+        
+        window.testFocus = function() {
+          console.log('🎯 Testing focus on employee...');
+          window.OrgChartAPI.focusOnEmployee(102);
+        };
+        
+        window.getStats = function() {
+          const stats = window.OrgChartAPI.getStats();
+          console.log('📊 Current stats:', stats);
+          return stats;
+        };
+        
+        console.log('🎮 Test functions available:');
+        console.log('- testCompany() - Test with full company data');
+        console.log('- testSimple() - Test with simple data');
+        console.log('- clearChart() - Clear the chart');
+        console.log('- testSearch() - Test search functionality');
+        console.log('- testFilter() - Test level filter');
+        console.log('- testExpand() - Expand all nodes');
+        console.log('- testCollapse() - Collapse all nodes');
+        console.log('- testFocus() - Focus on specific employee');
+        console.log('- getStats() - Get current statistics');
+      });
+    </script>
+  </body>
+</html>
