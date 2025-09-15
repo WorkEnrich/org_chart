@@ -22,11 +22,10 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
   const handleExpandClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    e.nativeEvent.stopImmediatePropagation();
     console.log('🖱️ Expand button clicked for:', employee.name, 'Has children:', hasChildren, 'Current expanded:', isExpanded);
     
     if (onToggleExpand && hasChildren) {
-      console.log('🔄 Calling toggle function for:', employee.id);
+      console.log('🔄 Calling toggle function for:', employee.jobTitleCode);
       onToggleExpand();
     }
   };
@@ -37,20 +36,6 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
       style={{ 
         borderColor: borderColor,
         backgroundColor: 'white'
-      }}
-      onMouseDown={(e) => {
-        // Only stop propagation if clicking on the expand button area
-        const target = e.target as HTMLElement;
-        if (target.closest('button')) {
-          e.stopPropagation();
-        }
-      }}
-      onClick={(e) => {
-        // Only stop propagation if clicking on the expand button area
-        const target = e.target as HTMLElement;
-        if (target.closest('button')) {
-          e.stopPropagation();
-        }
       }}
     >
       {/* Top Handle */}
@@ -73,27 +58,6 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
             <div className="pt-2">
             <button
               onClick={handleExpandClick}
-              onMouseDown={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                e.nativeEvent.stopImmediatePropagation();
-              }}
-              onMouseUp={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                e.nativeEvent.stopImmediatePropagation();
-              }}
-              onPointerDown={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                e.nativeEvent.stopImmediatePropagation();
-              }}
-              onPointerUp={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                e.nativeEvent.stopImmediatePropagation();
-              }}
-              style={{ pointerEvents: 'auto', zIndex: 1000 }}
               className={`flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 mx-auto ${
                 isExpanded 
                   ? `bg-green-100 text-green-700 border border-green-300 hover:bg-green-200` 

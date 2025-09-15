@@ -331,7 +331,7 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
             id: `edge-${employee.jobTitleCode}-${child.jobTitleCode}`,
             source: employee.jobTitleCode.toString(),
             target: child.jobTitleCode.toString(),
-            type: 'smoothstep',
+            type: 'step',
             animated: false,
             style: {
               stroke: getLevelBorderColor(level),
@@ -374,6 +374,18 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
   useEffect(() => {
     setNodes(nodes);
     setEdges(edges);
+    
+    // تحديث العرض بعد تحديث العقد والخطوط
+    if (nodes.length > 0) {
+      setTimeout(() => {
+        fitView({ 
+          padding: 0.15, 
+          includeHiddenNodes: false,
+          duration: 500,
+          maxZoom: 1.2
+        });
+      }, 100);
+    }
   }, [nodes, edges, setNodes, setEdges]);
 
   return (
