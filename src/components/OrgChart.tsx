@@ -159,27 +159,32 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
     const allNodes: Node[] = [];
     const allEdges: Edge[] = [];
     const processedCodes = new Set<number>();
+    const levelPositions = new Map<number, number>(); // تتبع المواضع في كل مستوى
     
     // Function to recursively process employees
-    const processEmployee = (employee: Employee, level: number, parentX: number = 0, siblingIndex: number = 0, totalSiblings: number = 1) => {
+    const processEmployee = (employee: Employee, level: number, parentX: number = 0, siblingIndex: number = 0, totalSiblings: number = 1, isRoot: boolean = false) => {
       if (processedCodes.has(employee.jobTitleCode)) return;
       processedCodes.add(employee.jobTitleCode);
 
-      const horizontalSpacing = 600; // زيادة المسافة الأفقية أكثر لفصل المجموعات
-      const verticalSpacing = 400;   // زيادة المسافة العمودية أكثر
+      const horizontalSpacing = 400; // مسافة أفقية معقولة
+      const verticalSpacing = 300;   // مسافة عمودية معقولة
       
       // Calculate position
       let x = parentX;
-      if (level > 1) {
-        // حساب أفضل للمواضع لتجنب التداخل
-        const totalWidth = Math.max((totalSiblings - 1) * horizontalSpacing, horizontalSpacing);
-        const startX = parentX - totalWidth / 2;
-        x = startX + (siblingIndex * horizontalSpacing);
-        
-        // تجنب التداخل مع العقد الموجودة
-        const existingPositions = allNodes.filter(n => Math.abs(n.position.y - ((level - 1) * verticalSpacing)) < 50);
-        while (existingPositions.some(n => Math.abs(n.position.x - x) < 400)) {
-          x += horizontalSpacing * 0.4;
+      
+      if (isRoot) {
+        // الجذر في المنتصف
+        x = 0;
+      } else if (level > 1) {
+        // حساب الموضع بناءً على الأشقاء
+        if (totalSiblings === 1) {
+          // إذا كان وحيد، ضعه تحت والده مباشرة
+          x = parentX;
+        } else {
+          // توزيع الأشقاء حول والدهم
+          const totalWidth = (totalSiblings - 1) * horizontalSpacing;
+          const startX = parentX - totalWidth / 2;
+          x = startX + (siblingIndex * horizontalSpacing);
         }
       }
       
@@ -232,13 +237,13 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
           });
 
           // Process child recursively
-          processEmployee(child, level + 1, x, index, employee.children!.length);
+          processEmployee(child, level + 1, x, index, employee.children!.length, false);
         });
       }
     };
 
     // Start processing from company data root
-    processEmployee(companyData, 1, 0, 0, 1);
+    processEmployee(companyData, 1, 0, 0, 1, true);
 
     console.log('📊 Generated nodes:', allNodes.length);
     console.log('🔗 Generated edges:', allEdges.length);
