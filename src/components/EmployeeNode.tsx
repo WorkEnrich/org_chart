@@ -1,7 +1,7 @@
 import React from 'react';
 import { Handle, Position, NodeProps } from 'reactflow';
 import { Employee } from '../types/Employee';
-import { getLevelColor } from '../utils/orgChartUtils';
+import { getCardBorderColor } from '../utils/orgChartUtils';
 import { Users, ChevronDown, ChevronRight } from 'lucide-react';
 
 interface EmployeeNodeData {
@@ -13,7 +13,7 @@ interface EmployeeNodeData {
 
 const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
   const { employee, hasChildren, isExpanded, onToggleExpand } = data;
-  const levelColors = getLevelColor(employee.level);
+  const levelColors = getCardBorderColor(employee.jobTitleCode, employee.level);
 
   const handleExpandClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -30,6 +30,7 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
   return (
     <div 
       className={`relative bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border-2 ${levelColors.bgColor} w-64 group hover:-translate-y-1`}
+      style={{ borderColor: levelColors.borderColor }}
       onMouseDown={(e) => {
         // Only stop propagation if clicking on the expand button area
         const target = e.target as HTMLElement;
