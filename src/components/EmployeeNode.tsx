@@ -53,22 +53,16 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
         style={{ top: -6 }}
       />
 
-      <div className="p-4">
-        {/* Avatar */}
-        <div className="flex justify-center mb-3">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
-            {employee.name.split(' ').map(n => n[0]).join('').substring(0, 2)}
-          </div>
-        </div>
-
-        {/* Employee Info */}
-        <div className="text-center">
-          <h3 className="text-base font-bold text-gray-900 mb-1 leading-tight">{employee.name}</h3>
-          <p className={`text-xs font-medium ${levelColors.color} mb-1 leading-tight`}>{employee.position}</p>
-          <p className="text-xs text-gray-500 mb-2">Code: {employee.jobTitleCode}</p>
+      <div className="p-5">
+        {/* Employee Info - Centered Layout */}
+        <div className="text-center space-y-2">
+          <h3 className="text-lg font-bold text-gray-900 leading-tight">{employee.name}</h3>
+          <p className={`text-sm font-medium ${levelColors.color} leading-tight`}>{employee.position}</p>
+          <p className="text-xs text-gray-500">Code: {employee.jobTitleCode}</p>
 
           {/* Expand/Collapse Button */}
           {hasChildren && (
+            <div className="pt-2">
             <button
               onClick={handleExpandClick}
               onMouseDown={(e) => {
@@ -102,6 +96,7 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
               {employee.children?.length || 0} Reports
               {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
             </button>
+            </div>
           )}
         </div>
       </div>
