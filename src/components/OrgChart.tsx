@@ -290,21 +290,19 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
             id: `edge-${employee.jobTitleCode}-${child.jobTitleCode}`,
             source: employee.jobTitleCode.toString(),
             target: child.jobTitleCode.toString(),
-            type: 'step',
+            type: 'smoothstep',
             animated: false,
             style: {
               stroke: getLevelColor(employee.level).borderColor,
-              strokeWidth: 3,
+              strokeWidth: 2,
               strokeDasharray: '0'
             },
             markerEnd: {
               type: 'arrowclosed',
-              width: 15,
-              height: 15,
+              width: 20,
+              height: 20,
               color: getLevelColor(employee.level).borderColor,
             },
-            sourceHandle: 'bottom',
-            targetHandle: 'top',
           });
 
           // Process child recursively
