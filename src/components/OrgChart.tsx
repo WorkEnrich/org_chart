@@ -167,9 +167,41 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
       if (processedCodes.has(employee.jobTitleCode)) return;
       processedCodes.add(employee.jobTitleCode);
 
-      const minHorizontalSpacing = 350; // الحد الأدنى للمسافة الأفقية
+      const cardWidth = 280;            // عرض الكارد
+      const minSpacing = 50;             // الحد الأدنى للمسافة بين الكاردات
       const verticalSpacing = 350;      // مسافة عمودية
-      const cardWidth = 280;            // عرض الكارد تقريباً
+      
+      // حساب المساحة المطلوبة للأطفال
+      const calculateRequiredWidth = (childrenCount: number) => {
+        if (childrenCount <= 1) return cardWidth;
+        
+        const totalCardsWidth = childrenCount * cardWidth;
+        const totalSpacing = (childrenCount - 1) * minSpacing;
+        const requiredWidth = totalCardsWidth + totalSpacing;
+        
+        // إضافة هامش إضافي إذا كان العدد كبير
+        const extraMargin = childrenCount > 3 ? (childrenCount - 3) * 30 : 0;
+        return requiredWidth + extraMargin;
+      };
+      
+      // حساب المسافة الديناميكية بناءً على عدد الأطفال
+      const calculateDynamicSpacing = (childrenCount: number, availableWidth: number) => {
+        if (childrenCount <= 1) return minSpacing;
+        
+        const requiredWidth = calculateRequiredWidth(childrenCount);
+        
+        // إذا كانت المساحة المطلوبة أكبر من المتاحة، نوزع بالتساوي
+        if (requiredWidth > availableWidth) {
+          const maxPossibleSpacing = Math.max(
+            minSpacing,
+            (availableWidth - (childrenCount * cardWidth)) / (childrenCount - 1)
+          );
+          return Math.max(minSpacing, maxPossibleSpacing);
+        }
+        
+        // إذا كانت المساحة كافية، نستخدم مسافة مريحة
+        return Math.max(minSpacing, (requiredWidth - (childrenCount * cardWidth)) / (childrenCount - 1));
+      };
       
       // Calculate position
       let x = parentX;
@@ -182,26 +214,46 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
           // إذا كان وحيد، ضعه تحت والده مباشرة مع إزاحة بسيطة لتجنب التداخل
           x = parentX;
         } else {
-          // حساب المسافة المطلوبة بناءً على عدد الأشقاء
-          const requiredSpacing = Math.max(450, cardWidth + 100); // زيادة المسافة الأفقية
+          // حساب المسافة الديناميكية
+          const availableWidth = window.innerWidth * 0.8; // 80% من عرض الشاشة
+          const dynamicSpacing = calculateDynamicSpacing(totalSiblings, availableWidth);
+          const requiredSpacing = cardWidth + dynamicSpacing;
+          
           const totalWidth = (totalSiblings - 1) * requiredSpacing;
           const startX = parentX - totalWidth / 2;
           x = startX + (siblingIndex * requiredSpacing);
+          
+          // تعديل إضافي للمستويات العميقة
+          if (level > 3) {
+            const levelMultiplier = Math.pow(1.2, level - 3);
+            x = parentX + ((siblingIndex - (totalSiblings - 1) / 2) * requiredSpacing * levelMultiplier);
+          }
         }
       }
       
-      // التأكد من عدم التداخل مع العقد الموجودة
-      const positionKey = `${level}-${Math.round(x / 50)}`;
+      // نظام تجنب التداخل المحسن
+      const gridSize = 30; // حجم الشبكة للتحقق من التداخل
+      const positionKey = `${level}-${Math.round(x / gridSize)}`;
       let attempts = 0;
-      while (usedPositions.has(positionKey) && attempts < 10) {
-        x += cardWidth + 80; // إزاحة إضافية أكبر لتجنب التداخل
-        const newPositionKey = `${level}-${Math.round(x / 50)}`;
+      const maxAttempts = 20;
+      
+      while (usedPositions.has(positionKey) && attempts < maxAttempts) {
+        // إزاحة تدريجية بناءً على عدد المحاولات
+        const offsetDirection = attempts % 2 === 0 ? 1 : -1;
+        const offsetAmount = Math.ceil(attempts / 2) * (cardWidth + minSpacing);
+        x += offsetDirection * offsetAmount;
+        
+        const newPositionKey = `${level}-${Math.round(x / gridSize)}`;
         if (!usedPositions.has(newPositionKey)) {
           break;
         }
         attempts++;
       }
-      usedPositions.add(`${level}-${Math.round(x / 50)}`);
+      
+      // حجز المساحة المطلوبة للكارد
+      for (let i = -2; i <= 2; i++) {
+        usedPositions.add(`${level}-${Math.round((x + i * gridSize) / gridSize)}`);
+      }
       
       const y = (level - 1) * verticalSpacing;
 
@@ -229,8 +281,8 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
       if (hasChildren && isExpanded && employee.children) {
         // حساب العرض الإجمالي المطلوب للأطفال
         const childrenCount = employee.children.length;
-        const childSpacing = Math.max(500, cardWidth + 120); // مسافة أكبر بين الأطفال
-        const totalChildrenWidth = (childrenCount - 1) * childSpacing;
+        const availableWidth = window.innerWidth * 0.9; // 90% من عرض الشاشة للأطفال
+        const dynamicSpacing = calculateDynamicSpacing(childrenCount, availableWidth);
         
         employee.children.forEach((child, index) => {
           // Create edge to child
@@ -256,7 +308,7 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
           });
 
           // Process child recursively
-          processEmployee(child, level + 1, x, index, employee.children!.length, false, totalChildrenWidth);
+          processEmployee(child, level + 1, x, index, employee.children!.length, false, availableWidth);
         });
       }
     };
