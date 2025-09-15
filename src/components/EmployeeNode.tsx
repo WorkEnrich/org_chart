@@ -9,11 +9,15 @@ interface EmployeeNodeData {
   hasChildren?: boolean;
   isExpanded?: boolean;
   onToggleExpand?: () => void;
+  levelBorderColor?: string;
 }
 
 const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
-  const { employee, hasChildren, isExpanded, onToggleExpand } = data;
+  const { employee, hasChildren, isExpanded, onToggleExpand, levelBorderColor } = data;
   const levelColors = getLevelColor(employee.level);
+  
+  // استخدام لون المستوى المخصص إذا كان متوفراً
+  const borderColor = levelBorderColor || levelColors.borderColor;
 
   const handleExpandClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -29,7 +33,11 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
 
   return (
     <div 
-      className={`relative bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border-2 ${levelColors.bgColor} w-64 group hover:-translate-y-1`}
+      className="relative bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border-2 w-64 group hover:-translate-y-1"
+      style={{ 
+        borderColor: borderColor,
+        backgroundColor: 'white'
+      }}
       onMouseDown={(e) => {
         // Only stop propagation if clicking on the expand button area
         const target = e.target as HTMLElement;
@@ -89,8 +97,12 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
               className={`flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 mx-auto ${
                 isExpanded 
                   ? `bg-green-100 text-green-700 border border-green-300 hover:bg-green-200` 
-                  : `${levelColors.color} ${levelColors.bgColor.replace('50', '100')} hover:${levelColors.bgColor.replace('50', '200')} border`
+                  : `text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300`
               }`}
+              style={!isExpanded ? { 
+                borderColor: borderColor,
+                color: borderColor
+              } : {}}
             >
               <Users className="w-3 h-3" />
               {employee.children?.length || 0} Reports
