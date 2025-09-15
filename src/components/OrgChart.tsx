@@ -165,8 +165,8 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
       if (processedCodes.has(employee.jobTitleCode)) return;
       processedCodes.add(employee.jobTitleCode);
 
-      const horizontalSpacing = 450; // زيادة المسافة الأفقية
-      const verticalSpacing = 350;   // زيادة المسافة العمودية
+      const horizontalSpacing = 600; // زيادة المسافة الأفقية أكثر لفصل المجموعات
+      const verticalSpacing = 400;   // زيادة المسافة العمودية أكثر
       
       // Calculate position
       let x = parentX;
@@ -178,8 +178,8 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
         
         // تجنب التداخل مع العقد الموجودة
         const existingPositions = allNodes.filter(n => Math.abs(n.position.y - ((level - 1) * verticalSpacing)) < 50);
-        while (existingPositions.some(n => Math.abs(n.position.x - x) < 300)) {
-          x += horizontalSpacing * 0.3;
+        while (existingPositions.some(n => Math.abs(n.position.x - x) < 400)) {
+          x += horizontalSpacing * 0.4;
         }
       }
       
