@@ -397,15 +397,16 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
         onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
         connectionMode={ConnectionMode.Loose}
-        nodesDraggable={true}
+        nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable={true}
-        panOnDrag={true}
+        panOnDrag={[1, 2]}
         selectionOnDrag={true}
         panOnScroll={true}
         zoomOnScroll={true}
         zoomOnPinch={true}
         zoomOnDoubleClick={true}
+        selectNodesOnDrag={false}
         fitView
         fitViewOptions={{
           padding: 0.15,

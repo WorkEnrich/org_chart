@@ -20,8 +20,11 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
   const borderColor = levelBorderColor || levelColors.borderColor;
 
   const handleExpandClick = (e: React.MouseEvent) => {
+    // منع جميع أنواع التضارب مع أحداث الماوس
     e.stopPropagation();
     e.preventDefault();
+    e.nativeEvent.stopImmediatePropagation();
+    
     console.log('🖱️ Expand button clicked for:', employee.name, 'Has children:', hasChildren, 'Current expanded:', isExpanded);
     
     if (onToggleExpand && hasChildren) {
@@ -30,12 +33,25 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
     }
   };
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // منع النقر على الكارد من التأثير على الزر
+    if ((e.target as HTMLElement).closest('button')) {
+      return;
+    }
+  };
   return (
     <div 
       className="relative bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border-2 w-64 group hover:-translate-y-1"
       style={{ 
         borderColor: borderColor,
         backgroundColor: 'white'
+      }}
+      onClick={handleCardClick}
+      onMouseDown={(e) => {
+        // منع السحب إذا كان النقر على الزر
+        if ((e.target as HTMLElement).closest('button')) {
+          e.stopPropagation();
+        }
       }}
     >
       {/* Top Handle */}
