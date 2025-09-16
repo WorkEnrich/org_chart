@@ -196,6 +196,27 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
     const allEdges: Edge[] = [];
     const processedIds = new Set<string>();
     
+    // Helper function to get item color based on chart type
+    const getItemColor = (item: any, type: 'orgChart' | 'companyChart') => {
+      if (type === 'orgChart') {
+        let code;
+        if (item.job_title_code) {
+          code = typeof item.job_title_code === 'string' ? item.job_title_code.hashCode() : item.job_title_code;
+        } else {
+          code = typeof item.name === 'string' ? item.name.hashCode() : 0;
+        }
+        return getCardBorderColor(Math.abs(code), item.level || item.job_level || 'Staff');
+      } else {
+        let id;
+        if (item.id) {
+          id = typeof item.id === 'string' ? item.id.hashCode() : item.id;
+        } else {
+          id = typeof item.name === 'string' ? item.name.hashCode() : 0;
+        }
+        return getCardBorderColor(Math.abs(id), item.type || 'company');
+      }
+    };
+
     // Find all root items (items without parents)
     const findRootItems = (data: any): any[] => {
       if (Array.isArray(data)) {
@@ -312,27 +333,6 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
 
     return { nodes: allNodes, edges: allEdges };
   }, [chartData, chartType, expandedNodes, toggleExpand]);
-
-  // Helper function to get item color based on chart type
-  const getItemColor = (item: any, type: 'orgChart' | 'companyChart') => {
-    if (type === 'orgChart') {
-      let code;
-      if (item.job_title_code) {
-        code = typeof item.job_title_code === 'string' ? item.job_title_code.hashCode() : item.job_title_code;
-      } else {
-        code = typeof item.name === 'string' ? item.name.hashCode() : 0;
-      }
-      return getCardBorderColor(Math.abs(code), item.level || item.job_level || 'Staff');
-    } else {
-      let id;
-      if (item.id) {
-        id = typeof item.id === 'string' ? item.id.hashCode() : item.id;
-      } else {
-        id = typeof item.name === 'string' ? item.name.hashCode() : 0;
-      }
-      return getCardBorderColor(Math.abs(id), item.type || 'company');
-    }
-  };
 
   const [nodesState, setNodes, onNodesChange] = useNodesState([]);
   const [edgesState, setEdges, onEdgesChange] = useEdgesState([]);
