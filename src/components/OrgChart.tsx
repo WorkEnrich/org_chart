@@ -10,6 +10,7 @@ import ReactFlow, {
   useReactFlow,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
+import ELK from 'elkjs/lib/elk.bundled.js';
 import { Employee } from '../types/Employee';
 import EmployeeNode from './EmployeeNode';
 import { getLevelColor, getCardBorderColor } from '../utils/orgChartUtils';
