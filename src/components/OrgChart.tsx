@@ -196,8 +196,29 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
     const allEdges: Edge[] = [];
     const processedIds = new Set<string>();
     
+    // Find all root items (items without parents)
+    const findRootItems = (data: any): any[] => {
+      if (Array.isArray(data)) {
+        return data.filter(item => item.firstNode || !hasParent(item, data));
+      } else {
+        return [data];
+      }
+    };
+    
+    // Check if an item has a parent in the data
+    const hasParent = (item: any, allData: any[]): boolean => {
+      const itemId = getItemId(item, chartType);
+      return allData.some(otherItem => 
+        otherItem.children && 
+        otherItem.children.some((child: any) => getItemId(child, chartType) === itemId)
+      );
+    };
+    
+    const rootItems = findRootItems(chartData);
+    console.log('🌳 Found root items:', rootItems.length);
+    
     // Function to recursively process items
-    const processItem = (item: any, level: number, parentX: number = 0, siblingIndex: number = 0, totalSiblings: number = 1) => {
+    const processItem = (item: any, level: number, parentX: number = 0, siblingIndex: number = 0, totalSiblings: number = 1, isRoot: boolean = false) => {
       const itemId = getItemId(item, chartType);
       if (processedIds.has(itemId)) return;
       processedIds.add(itemId);
@@ -207,7 +228,12 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
       
       // Calculate position
       let x = parentX;
-      if (level > 1) {
+      if (isRoot && level === 1) {
+        // For root items, arrange them side by side
+        const totalRootWidth = Math.max((totalSiblings - 1) * horizontalSpacing, 0);
+        const startX = -totalRootWidth / 2;
+        x = startX + (siblingIndex * horizontalSpacing);
+      } else if (level > 1) {
         // حساب أفضل للمواضع لتجنب التداخل
         const totalWidth = Math.max((totalSiblings - 1) * horizontalSpacing, horizontalSpacing);
         const startX = parentX - totalWidth / 2;
@@ -271,19 +297,15 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
           });
 
           // Process child recursively
-          processItem(child, level + 1, x, index, item.children!.length);
+          processItem(child, level + 1, x, index, item.children!.length, false);
         });
       }
     };
 
-    // Start processing from chart data root
-    if (Array.isArray(chartData)) {
-      chartData.forEach((item, index) => {
-        processItem(item, 1, index * 500, index, chartData.length);
-      });
-    } else {
-      processItem(chartData, 1, 0, 0, 1);
-    }
+    // Process all root items side by side
+    rootItems.forEach((item, index) => {
+      processItem(item, 1, 0, index, rootItems.length, true);
+    });
 
     console.log('📊 Generated nodes:', allNodes.length);
     console.log('🔗 Generated edges:', allEdges.length);
