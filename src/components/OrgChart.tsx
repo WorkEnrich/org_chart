@@ -28,11 +28,11 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
   const { fitView } = useReactFlow();
 
   // Helper function to generate unique ID for items based on their position in hierarchy
-  const generateItemId = (item: any, parentId: string = '', index: number = 0): string => {
+  const generateItemId = useCallback((item: any, parentId: string = '', index: number = 0): string => {
     // Use name + position in hierarchy to create unique ID
     const baseName = item.name || `item-${index}`;
     return parentId ? `${parentId}-${baseName}-${index}` : `root-${baseName}-${index}`;
-  };
+  }, []);
 
   // Update expanded nodes when data changes
   useEffect(() => {
@@ -158,8 +158,7 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
     };
   }, [chartData, chartType, fitView, generateItemId]);
 
-  const toggleExpand = useCallback((item: any) => {
-    const nodeId = item._generatedId; // Use the generated ID stored in item
+  const toggleExpand = useCallback((nodeId: string) => {
     console.log('🔄 Toggling expand for node:', nodeId);
     setExpandedNodes(prev => {
       const newSet = new Set(prev);
@@ -196,7 +195,6 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
     const allNodes: Node[] = [];
     const allEdges: Edge[] = [];
     const processedIds = new Set<string>();
-    const itemIdMap = new Map<any, string>(); // Map to store item -> generated ID
     
     // Helper function to get item color based on chart type
     const getItemColor = (item: any, type: 'orgChart' | 'companyChart') => {
@@ -227,10 +225,6 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
     const processItem = (item: any, level: number, parentX: number = 0, siblingIndex: number = 0, totalSiblings: number = 1, isRoot: boolean = false, parentId: string = '') => {
       // Generate unique ID based on hierarchy position
       const itemId = generateItemId(item, parentId, siblingIndex);
-      
-      // Store the generated ID in the item for later use
-      item._generatedId = itemId;
-      itemIdMap.set(item, itemId);
       
       if (processedIds.has(itemId)) return;
       processedIds.add(itemId);
@@ -275,7 +269,7 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
           chartType,
           hasChildren,
           isExpanded,
-          onToggleExpand: () => toggleExpand(item),
+          onToggleExpand: () => toggleExpand(itemId),
         },
         draggable: false,
         selectable: false,
@@ -285,8 +279,6 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
       if (hasChildren && isExpanded && item.children) {
         item.children.forEach((child: any, index: number) => {
           const childId = generateItemId(child, itemId, index);
-          child._generatedId = childId;
-          itemIdMap.set(child, childId);
           
           // Get current item's border color for the connection line
           const currentCardColors = getItemColor(item, chartType);
