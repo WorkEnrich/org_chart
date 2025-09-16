@@ -246,8 +246,8 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
       if (processedIds.has(itemId)) return;
       processedIds.add(itemId);
 
-      const horizontalSpacing = 450; // زيادة المسافة الأفقية
-      const verticalSpacing = 350;   // زيادة المسافة العمودية
+      const horizontalSpacing = 600; // زيادة المسافة الأفقية أكثر
+      const verticalSpacing = 400;   // زيادة المسافة العمودية أكثر
       
       // Calculate position
       let x = parentX;
@@ -257,15 +257,15 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
         const startX = -totalRootWidth / 2;
         x = startX + (siblingIndex * horizontalSpacing);
       } else if (level > 1) {
-        // حساب أفضل للمواضع لتجنب التداخل
-        const totalWidth = Math.max((totalSiblings - 1) * horizontalSpacing, horizontalSpacing);
+        // حساب أفضل للمواضع مع مسافات أكبر لتجنب التداخل
+        const totalWidth = Math.max((totalSiblings - 1) * horizontalSpacing, horizontalSpacing * 1.2);
         const startX = parentX - totalWidth / 2;
         x = startX + (siblingIndex * horizontalSpacing);
         
-        // تجنب التداخل مع العقد الموجودة
+        // تجنب التداخل مع العقد الموجودة بمسافة أكبر
         const existingPositions = allNodes.filter(n => Math.abs(n.position.y - ((level - 1) * verticalSpacing)) < 50);
-        while (existingPositions.some(n => Math.abs(n.position.x - x) < 300)) {
-          x += horizontalSpacing * 0.3;
+        while (existingPositions.some(n => Math.abs(n.position.x - x) < 400)) {
+          x += horizontalSpacing * 0.4;
         }
       }
       
