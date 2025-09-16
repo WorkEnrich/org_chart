@@ -280,16 +280,23 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
       let x = parentX;
       if (isRoot && level === 1) {
         // For root items, arrange them side by side
-        const totalRootWidth = Math.max((totalSiblings - 1) * horizontalSpacing, 0);
+        const totalRootWidth = Math.max((totalSiblings - 1) * (horizontalSpacing * 1.5), 0);
         const startX = -totalRootWidth / 2;
-        x = startX + (siblingIndex * horizontalSpacing);
+        x = startX + (siblingIndex * (horizontalSpacing * 1.5));
       } else if (level > 1) {
-        // حساب المواضع للبنية الشجرية
-        const totalWidth = Math.max((totalSiblings - 1) * horizontalSpacing, 0);
-        const startX = parentX - totalWidth / 2;
-        x = startX + (siblingIndex * horizontalSpacing);
+        // حساب المواضع للبنية الهرمية التقليدية
+        if (totalSiblings === 1) {
+          // إذا كان طفل واحد، ضعه تحت الأب مباشرة
+          x = parentX;
+        } else {
+          // توزيع الأطفال بشكل متوازن حول الأب
+          const totalWidth = (totalSiblings - 1) * horizontalSpacing;
+          const startX = parentX - totalWidth / 2;
+          x = startX + (siblingIndex * horizontalSpacing);
+        }
       }
       
+      // حساب الموضع العمودي للبنية الهرمية
       const y = (level - 1) * verticalSpacing;
 
       const hasChildren = item.children && item.children.length > 0;
@@ -327,17 +334,17 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
             id: `edge-${itemId}-${childId}`,
             source: itemId,
             target: childId,
-            type: 'step',
+            type: 'smoothstep',
             animated: false,
             style: {
               stroke: itemColors.borderColor,
-              strokeWidth: 2,
+              strokeWidth: 3,
               strokeDasharray: '0',
             },
             markerEnd: {
               type: 'arrowclosed',
-              width: 15,
-              height: 15,
+              width: 12,
+              height: 12,
               color: itemColors.borderColor,
             },
           });
@@ -394,13 +401,13 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
         }}
         minZoom={0.1}
         maxZoom={2}
-        defaultViewport={{ x: 0, y: 0, zoom: 0.6 }}
+        defaultViewport={{ x: 0, y: 0, zoom: 0.5 }}
       >
         <Background 
           color="#e2e8f0" 
-          gap={20} 
+          gap={16} 
           size={1}
-          variant="lines"
+          variant="dots"
         />
         <Controls 
           position="top-right"
