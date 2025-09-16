@@ -58,43 +58,83 @@ export const getCardBorderColor = (jobTitleCode: number, level: string): { color
     'Executive': [
       { color: 'text-purple-700', bgColor: 'bg-purple-50', borderColor: '#a855f7' },
       { color: 'text-violet-700', bgColor: 'bg-violet-50', borderColor: '#8b5cf6' },
-      { color: 'text-indigo-700', bgColor: 'bg-indigo-50', borderColor: '#6366f1' }
+      { color: 'text-indigo-700', bgColor: 'bg-indigo-50', borderColor: '#6366f1' },
+      { color: 'text-fuchsia-700', bgColor: 'bg-fuchsia-50', borderColor: '#d946ef' },
+      { color: 'text-pink-700', bgColor: 'bg-pink-50', borderColor: '#ec4899' }
     ],
     'Senior Management': [
       { color: 'text-blue-700', bgColor: 'bg-blue-50', borderColor: '#3b82f6' },
       { color: 'text-sky-700', bgColor: 'bg-sky-50', borderColor: '#0ea5e9' },
       { color: 'text-cyan-700', bgColor: 'bg-cyan-50', borderColor: '#06b6d4' },
-      { color: 'text-teal-700', bgColor: 'bg-teal-50', borderColor: '#14b8a6' }
+      { color: 'text-teal-700', bgColor: 'bg-teal-50', borderColor: '#14b8a6' },
+      { color: 'text-slate-700', bgColor: 'bg-slate-50', borderColor: '#64748b' },
+      { color: 'text-zinc-700', bgColor: 'bg-zinc-50', borderColor: '#71717a' }
     ],
     'Middle Management': [
       { color: 'text-green-700', bgColor: 'bg-green-50', borderColor: '#10b981' },
       { color: 'text-emerald-700', bgColor: 'bg-emerald-50', borderColor: '#059669' },
       { color: 'text-lime-700', bgColor: 'bg-lime-50', borderColor: '#65a30d' },
-      { color: 'text-yellow-700', bgColor: 'bg-yellow-50', borderColor: '#eab308' }
+      { color: 'text-yellow-700', bgColor: 'bg-yellow-50', borderColor: '#eab308' },
+      { color: 'text-amber-700', bgColor: 'bg-amber-50', borderColor: '#f59e0b' },
+      { color: 'text-orange-700', bgColor: 'bg-orange-50', borderColor: '#ea580c' }
     ],
     'Junior Management': [
       { color: 'text-orange-700', bgColor: 'bg-orange-50', borderColor: '#f59e0b' },
       { color: 'text-amber-700', bgColor: 'bg-amber-50', borderColor: '#f59e0b' },
       { color: 'text-red-700', bgColor: 'bg-red-50', borderColor: '#ef4444' },
-      { color: 'text-rose-700', bgColor: 'bg-rose-50', borderColor: '#f43f5e' }
+      { color: 'text-rose-700', bgColor: 'bg-rose-50', borderColor: '#f43f5e' },
+      { color: 'text-pink-700', bgColor: 'bg-pink-50', borderColor: '#ec4899' },
+      { color: 'text-fuchsia-700', bgColor: 'bg-fuchsia-50', borderColor: '#d946ef' }
     ],
     'Senior Staff': [
       { color: 'text-red-700', bgColor: 'bg-red-50', borderColor: '#ef4444' },
       { color: 'text-pink-700', bgColor: 'bg-pink-50', borderColor: '#ec4899' },
       { color: 'text-fuchsia-700', bgColor: 'bg-fuchsia-50', borderColor: '#d946ef' },
-      { color: 'text-purple-700', bgColor: 'bg-purple-50', borderColor: '#a855f7' }
+      { color: 'text-purple-700', bgColor: 'bg-purple-50', borderColor: '#a855f7' },
+      { color: 'text-violet-700', bgColor: 'bg-violet-50', borderColor: '#8b5cf6' },
+      { color: 'text-indigo-700', bgColor: 'bg-indigo-50', borderColor: '#6366f1' }
     ],
     'Staff': [
       { color: 'text-pink-700', bgColor: 'bg-pink-50', borderColor: '#ec4899' },
       { color: 'text-rose-700', bgColor: 'bg-rose-50', borderColor: '#f43f5e' },
       { color: 'text-red-700', bgColor: 'bg-red-50', borderColor: '#ef4444' },
-      { color: 'text-orange-700', bgColor: 'bg-orange-50', borderColor: '#f59e0b' }
+      { color: 'text-orange-700', bgColor: 'bg-orange-50', borderColor: '#f59e0b' },
+      { color: 'text-amber-700', bgColor: 'bg-amber-50', borderColor: '#f59e0b' },
+      { color: 'text-yellow-700', bgColor: 'bg-yellow-50', borderColor: '#eab308' }
     ],
     'Entry Level': [
       { color: 'text-indigo-700', bgColor: 'bg-indigo-50', borderColor: '#6366f1' },
       { color: 'text-blue-700', bgColor: 'bg-blue-50', borderColor: '#3b82f6' },
       { color: 'text-sky-700', bgColor: 'bg-sky-50', borderColor: '#0ea5e9' },
-      { color: 'text-cyan-700', bgColor: 'bg-cyan-50', borderColor: '#06b6d4' }
+      { color: 'text-cyan-700', bgColor: 'bg-cyan-50', borderColor: '#06b6d4' },
+      { color: 'text-teal-700', bgColor: 'bg-teal-50', borderColor: '#14b8a6' },
+      { color: 'text-green-700', bgColor: 'bg-green-50', borderColor: '#10b981' }
+    ],
+    // إضافة ألوان للأنواع الأخرى
+    'company': [
+      { color: 'text-purple-700', bgColor: 'bg-purple-50', borderColor: '#a855f7' },
+      { color: 'text-blue-700', bgColor: 'bg-blue-50', borderColor: '#3b82f6' },
+      { color: 'text-green-700', bgColor: 'bg-green-50', borderColor: '#10b981' }
+    ],
+    'branch': [
+      { color: 'text-orange-700', bgColor: 'bg-orange-50', borderColor: '#f59e0b' },
+      { color: 'text-red-700', bgColor: 'bg-red-50', borderColor: '#ef4444' },
+      { color: 'text-pink-700', bgColor: 'bg-pink-50', borderColor: '#ec4899' }
+    ],
+    'department': [
+      { color: 'text-cyan-700', bgColor: 'bg-cyan-50', borderColor: '#06b6d4' },
+      { color: 'text-teal-700', bgColor: 'bg-teal-50', borderColor: '#14b8a6' },
+      { color: 'text-emerald-700', bgColor: 'bg-emerald-50', borderColor: '#059669' }
+    ],
+    'section': [
+      { color: 'text-lime-700', bgColor: 'bg-lime-50', borderColor: '#65a30d' },
+      { color: 'text-yellow-700', bgColor: 'bg-yellow-50', borderColor: '#eab308' },
+      { color: 'text-amber-700', bgColor: 'bg-amber-50', borderColor: '#f59e0b' }
+    ],
+    'job_title': [
+      { color: 'text-violet-700', bgColor: 'bg-violet-50', borderColor: '#8b5cf6' },
+      { color: 'text-fuchsia-700', bgColor: 'bg-fuchsia-50', borderColor: '#d946ef' },
+      { color: 'text-rose-700', bgColor: 'bg-rose-50', borderColor: '#f43f5e' }
     ]
   };
 

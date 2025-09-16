@@ -7,16 +7,21 @@ import { Users, ChevronDown, ChevronRight } from 'lucide-react';
 interface EmployeeNodeData {
   item: any;
   chartType: 'orgChart' | 'companyChart';
+  itemColors?: { color: string; bgColor: string; borderColor: string };
   hasChildren?: boolean;
   isExpanded?: boolean;
   onToggleExpand?: () => void;
 }
 
 const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
-  const { item, chartType, hasChildren, isExpanded, onToggleExpand } = data;
+  const { item, chartType, itemColors, hasChildren, isExpanded, onToggleExpand } = data;
   
   // Get colors based on chart type
   const getItemColors = () => {
+    if (itemColors) {
+      return itemColors;
+    }
+    
     if (chartType === 'orgChart') {
       let code;
       if (item.job_title_code) {
@@ -148,8 +153,7 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
           type="source"
           position={Position.Bottom}
           className="w-3 h-3 !border-2 !border-white"
-          style={{ backgroundColor: levelColors.borderColor }}
-          style={{ bottom: -6 }}
+          style={{ backgroundColor: levelColors.borderColor, bottom: -6 }}
         />
       )}
     </div>

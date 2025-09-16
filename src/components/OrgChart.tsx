@@ -199,22 +199,39 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
     // Helper function to get item color based on chart type
     const getItemColor = (item: any, type: 'orgChart' | 'companyChart') => {
       if (type === 'orgChart') {
-        let code;
+        let code = 0;
         if (item.job_title_code) {
           code = typeof item.job_title_code === 'string' ? item.job_title_code.hashCode() : item.job_title_code;
-        } else {
+        } else if (item.name) {
           code = typeof item.name === 'string' ? item.name.hashCode() : 0;
+        } else {
+          code = Math.random() * 1000;
         }
         return getCardBorderColor(Math.abs(code), item.level || item.job_level || 'Staff');
       } else {
-        let id;
+        let id = 0;
         if (item.id) {
           id = typeof item.id === 'string' ? item.id.hashCode() : item.id;
-        } else {
+        } else if (item.name) {
           id = typeof item.name === 'string' ? item.name.hashCode() : 0;
+        } else {
+          id = Math.random() * 1000;
         }
         return getCardBorderColor(Math.abs(id), item.type || 'company');
       }
+    };
+
+    // Helper function to get unique color for each item at same level
+    const getUniqueItemColor = (item: any, type: 'orgChart' | 'companyChart', siblingIndex: number, level: number) => {
+      // Create a unique seed based on item position, level, and sibling index
+      let seed = 0;
+      if (item.name) {
+        seed = typeof item.name === 'string' ? item.name.hashCode() : 0;
+      }
+      seed += siblingIndex * 1000 + level * 100;
+      
+      const itemLevel = type === 'orgChart' ? (item.level || item.job_level || 'Staff') : (item.type || 'company');
+      return getCardBorderColor(Math.abs(seed), itemLevel);
     };
 
     // Find root items - items that are at the top level or marked as firstNode
@@ -257,6 +274,9 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
       const hasChildren = item.children && item.children.length > 0;
       const isExpanded = expandedNodes.has(itemId);
 
+      // Get unique color for this item
+      const itemColors = getUniqueItemColor(item, chartType, siblingIndex, level);
+
       console.log(`👤 Processing: ${item.name} (Level ${level}) - Children: ${hasChildren ? item.children!.length : 0} - Expanded: ${isExpanded}`);
 
       // Create node
@@ -267,6 +287,7 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
         data: {
           item,
           chartType,
+          itemColors,
           hasChildren,
           isExpanded,
           onToggleExpand: () => toggleExpand(itemId),
@@ -280,9 +301,6 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
         item.children.forEach((child: any, index: number) => {
           const childId = generateItemId(child, itemId, index);
           
-          // Get current item's border color for the connection line
-          const currentCardColors = getItemColor(item, chartType);
-          
           // Create edge to child (parent -> child relationship)
           allEdges.push({
             id: `edge-${itemId}-${childId}`,
@@ -291,7 +309,7 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
             type: 'smoothstep',
             animated: false,
             style: {
-              stroke: currentCardColors.borderColor,
+              stroke: itemColors.borderColor,
               strokeWidth: 4,
               strokeDasharray: '0',
             },
@@ -299,7 +317,7 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
               type: 'arrowclosed',
               width: 20,
               height: 20,
-              color: currentCardColors.borderColor,
+              color: itemColors.borderColor,
             },
           });
 
