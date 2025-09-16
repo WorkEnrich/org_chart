@@ -221,14 +221,41 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
       }
     };
 
-    // Helper function to get unique color for each item at same level
-    const getUniqueItemColor = (item: any, type: 'orgChart' | 'companyChart', siblingIndex: number, level: number) => {
-      // Create a unique seed based on item position, level, and sibling index
+    // Helper function to get unique color for each item
+    const getUniqueItemColor = (item: any, type: 'orgChart' | 'companyChart', siblingIndex: number, level: number, parentId: string = '') => {
+      // إنشاء seed فريد لكل كارد بناءً على عدة عوامل
       let seed = 0;
+      
+      // استخدام اسم العنصر
       if (item.name) {
-        seed = typeof item.name === 'string' ? item.name.hashCode() : 0;
+        seed += typeof item.name === 'string' ? item.name.hashCode() : 0;
       }
-      seed += siblingIndex * 1000 + level * 100;
+      
+      // إضافة موقع العنصر في الهيكل
+      seed += siblingIndex * 1000;
+      seed += level * 100;
+      
+      // إضافة معرف الأب لضمان التفرد
+      if (parentId) {
+        seed += parentId.hashCode();
+      }
+      
+      // إضافة عوامل إضافية للتفرد
+      if (type === 'orgChart') {
+        if (item.job_title_code) {
+          seed += typeof item.job_title_code === 'string' ? item.job_title_code.hashCode() : item.job_title_code;
+        }
+        if (item.position) {
+          seed += item.position.hashCode();
+        }
+      } else {
+        if (item.id) {
+          seed += typeof item.id === 'string' ? item.id.hashCode() : item.id;
+        }
+        if (item.code) {
+          seed += item.code.hashCode();
+        }
+      }
       
       const itemLevel = type === 'orgChart' ? (item.level || item.job_level || 'Staff') : (item.type || 'company');
       return getCardBorderColor(Math.abs(seed), itemLevel);
@@ -274,8 +301,8 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
       const hasChildren = item.children && item.children.length > 0;
       const isExpanded = expandedNodes.has(itemId);
 
-      // Get unique color for this item
-      const itemColors = getUniqueItemColor(item, chartType, siblingIndex, level);
+      // Get unique color for this item - تمرير parentId للمزيد من التفرد
+      const itemColors = getUniqueItemColor(item, chartType, siblingIndex, level, parentId);
 
       console.log(`👤 Processing: ${item.name} (Level ${level}) - Children: ${hasChildren ? item.children!.length : 0} - Expanded: ${isExpanded}`);
 
