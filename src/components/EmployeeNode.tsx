@@ -103,11 +103,8 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
       <Handle
         type="target"
         position={Position.Top}
-        className="w-4 h-4 !border-2 !border-white"
-        style={{ 
-          backgroundColor: levelColors.borderColor,
-          top: -8
-        }}
+        className="w-3 h-3 !bg-blue-500 !border-2 !border-white"
+        style={{ top: -6 }}
       />
 
       <div className="p-5">
@@ -152,49 +149,12 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
 
       {/* Bottom Handle - only show if has children and is expanded */}
       {hasChildren && isExpanded && (
-        <>
-          {/* Multiple source handles for better line distribution */}
-          <Handle
-            type="source"
-            position={Position.Bottom}
-            id="center"
-            className="w-4 h-4 !border-2 !border-white"
-            style={{ 
-              backgroundColor: levelColors.borderColor, 
-              bottom: -8,
-              left: '50%',
-              transform: 'translateX(-50%)'
-            }}
-          />
-          {item.children && item.children.length > 1 && (
-            <>
-              <Handle
-                type="source"
-                position={Position.Bottom}
-                id="left"
-                className="w-3 h-3 !border-2 !border-white opacity-0"
-                style={{ 
-                  backgroundColor: levelColors.borderColor, 
-                  bottom: -6,
-                  left: '25%',
-                  transform: 'translateX(-50%)'
-                }}
-              />
-              <Handle
-                type="source"
-                position={Position.Bottom}
-                id="right"
-                className="w-3 h-3 !border-2 !border-white opacity-0"
-                style={{ 
-                  backgroundColor: levelColors.borderColor, 
-                  bottom: -6,
-                  left: '75%',
-                  transform: 'translateX(-50%)'
-                }}
-              />
-            </>
-          )}
-        </>
+        <Handle
+          type="source"
+          position={Position.Bottom}
+          className="w-3 h-3 !border-2 !border-white"
+          style={{ backgroundColor: levelColors.borderColor, bottom: -6 }}
+        />
       )}
     </div>
   );

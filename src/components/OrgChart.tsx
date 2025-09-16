@@ -333,18 +333,12 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
             id: `edge-${itemId}-${childId}`,
             source: itemId,
             target: childId,
-            type: 'default',
+            type: 'smoothstep',
             animated: false,
-            sourceHandle: null,
-            targetHandle: null,
             style: {
               stroke: itemColors.borderColor,
-              strokeWidth: 3,
+              strokeWidth: 4,
               strokeDasharray: '0',
-            },
-            pathOptions: {
-              offset: index * 15 - ((item.children!.length - 1) * 15) / 2, // توزيع الخطوط حول المركز
-              borderRadius: 10,
             },
             markerEnd: {
               type: 'arrowclosed',
@@ -365,49 +359,6 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
       processItem(item, 1, 0, index, rootItems.length, true, '');
     });
 
-    // تحسين توزيع الخطوط للعقد التي لها أطفال متعددة
-    const improveEdgeDistribution = () => {
-      const nodeChildrenMap = new Map<string, string[]>();
-      
-      // جمع معلومات الأطفال لكل عقدة
-      allEdges.forEach(edge => {
-        if (!nodeChildrenMap.has(edge.source)) {
-          nodeChildrenMap.set(edge.source, []);
-        }
-        nodeChildrenMap.get(edge.source)!.push(edge.target);
-      });
-      
-      // تحديث الخطوط لتحسين التوزيع
-      allEdges.forEach((edge, index) => {
-        const siblings = nodeChildrenMap.get(edge.source) || [];
-        const siblingIndex = siblings.indexOf(edge.target);
-        const totalSiblings = siblings.length;
-        
-        if (totalSiblings > 1) {
-          // حساب الإزاحة للخطوط المتعددة
-          const offset = (siblingIndex - (totalSiblings - 1) / 2) * 20;
-          
-          // تحديث نوع الخط والإعدادات
-          edge.type = 'smoothstep';
-          edge.pathOptions = {
-            offset: offset,
-            borderRadius: 15,
-          };
-          
-          // استخدام handles مختلفة حسب الموقع
-          if (totalSiblings === 2) {
-            edge.sourceHandle = siblingIndex === 0 ? 'left' : 'right';
-          } else if (totalSiblings >= 3) {
-            if (siblingIndex === 0) edge.sourceHandle = 'left';
-            else if (siblingIndex === totalSiblings - 1) edge.sourceHandle = 'right';
-            else edge.sourceHandle = 'center';
-          }
-        }
-      });
-    };
-    
-    // تطبيق تحسين توزيع الخطوط
-    improveEdgeDistribution();
     console.log('📊 Generated nodes:', allNodes.length);
     console.log('🔗 Generated edges:', allEdges.length);
 
