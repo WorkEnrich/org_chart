@@ -103,28 +103,28 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
       <Handle
         type="target"
         position={Position.Top}
-        className="w-3 h-3 !border-2 !border-white !bg-opacity-80"
+        className="w-2 h-2 !border-2 !border-white !bg-opacity-80"
         style={{ backgroundColor: levelColors.borderColor }}
-        style={{ top: -8 }}
+        style={{ top: -6 }}
       />
 
-      <div className="p-5">
+      <div className="p-4">
         {/* Employee Info - Centered Layout */}
-        <div className="text-center space-y-3">
-          <h3 className="text-lg font-bold text-gray-900 leading-tight">{displayInfo.name}</h3>
-          <p className={`text-sm font-medium ${levelColors.color} leading-tight`}>{displayInfo.position}</p>
+        <div className="text-center space-y-2">
+          <h3 className="text-base font-bold text-gray-900 leading-tight">{displayInfo.name}</h3>
+          <p className={`text-xs font-medium ${levelColors.color} leading-tight`}>{displayInfo.position}</p>
           <p className="text-xs text-gray-500 font-mono">Code: {displayInfo.code}</p>
 
           {/* Expand/Collapse Button */}
           {hasChildren && (
-            <div className="pt-2">
+            <div className="pt-1">
               <button
                 onClick={handleExpandClick}
                 onMouseDown={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
                 }}
-                className="flex items-center justify-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 mx-auto border relative z-10 hover:scale-105"
+                className="flex items-center justify-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-all duration-200 mx-auto border relative z-10 hover:scale-105"
                 style={{
                   backgroundColor: isExpanded ? '#dcfce7' : 
                     levelColors.bgColor.includes('purple') ? '#f3e8ff' :
@@ -139,9 +139,9 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
                   pointerEvents: 'auto'
                 }}
               >
-                <Users className="w-4 h-4" />
+                <Users className="w-3 h-3" />
                 {item.children?.length || 0} {chartType === 'orgChart' ? 'Reports' : 'Items'}
-                {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
               </button>
             </div>
           )}
@@ -153,8 +153,8 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
         <Handle
           type="source"
           position={Position.Bottom}
-          className="w-3 h-3 !border-2 !border-white !bg-opacity-80"
-          style={{ backgroundColor: levelColors.borderColor, bottom: -8 }}
+          className="w-2 h-2 !border-2 !border-white !bg-opacity-80"
+          style={{ backgroundColor: levelColors.borderColor, bottom: -6 }}
         />
       )}
     </div>
