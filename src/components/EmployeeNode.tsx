@@ -135,11 +135,18 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
                 e.nativeEvent.stopImmediatePropagation();
               }}
               style={{ pointerEvents: 'auto', zIndex: 1000 }}
-              className={`flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 mx-auto ${
-                isExpanded 
-                  ? `bg-green-100 text-green-700 border border-green-300 hover:bg-green-200` 
-                  : `${levelColors.color} ${levelColors.bgColor.replace('50', '100')} hover:${levelColors.bgColor.replace('50', '200')} border`
-              }`}
+              className={`flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 mx-auto border`}
+              style={{
+                backgroundColor: isExpanded ? '#dcfce7' : levelColors.bgColor.replace('bg-', '').replace('-50', '') === 'purple' ? '#f3e8ff' :
+                                levelColors.bgColor.replace('bg-', '').replace('-50', '') === 'blue' ? '#dbeafe' :
+                                levelColors.bgColor.replace('bg-', '').replace('-50', '') === 'green' ? '#dcfce7' :
+                                levelColors.bgColor.replace('bg-', '').replace('-50', '') === 'orange' ? '#fed7aa' :
+                                levelColors.bgColor.replace('bg-', '').replace('-50', '') === 'red' ? '#fecaca' :
+                                levelColors.bgColor.replace('bg-', '').replace('-50', '') === 'pink' ? '#fce7f3' :
+                                levelColors.bgColor.replace('bg-', '').replace('-50', '') === 'indigo' ? '#e0e7ff' : '#f3f4f6',
+                color: isExpanded ? '#15803d' : levelColors.borderColor,
+                borderColor: levelColors.borderColor
+              }}
             >
               <Users className="w-3 h-3" />
               {item.children?.length || 0} {chartType === 'orgChart' ? 'Reports' : 'Items'}
@@ -155,7 +162,8 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
         <Handle
           type="source"
           position={Position.Bottom}
-          className="w-3 h-3 !bg-green-500 !border-2 !border-white"
+          className="w-3 h-3 !border-2 !border-white"
+          style={{ backgroundColor: levelColors.borderColor }}
           style={{ bottom: -6 }}
         />
       )}
