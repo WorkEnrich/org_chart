@@ -23,6 +23,47 @@ const nodeTypes = {
   employee: EmployeeNode,
 };
 
+const elk = new ELK();
+
+// ELK layout options
+const elkOptions = {
+  'elk.algorithm': 'layered',
+  'elk.layered.spacing.nodeNodeBetweenLayers': '100',
+  'elk.spacing.nodeNode': '80',
+  'elk.direction': 'DOWN',
+  'elk.layered.nodePlacement.strategy': 'SIMPLE',
+};
+
+const getLayoutedElements = async (nodes: Node[], edges: Edge[]) => {
+  const isHorizontal = elkOptions['elk.direction'] === 'RIGHT';
+  const graph = {
+    id: 'root',
+    layoutOptions: elkOptions,
+    children: nodes.map((node) => ({
+      ...node,
+      // Calculate the width and height of nodes for ELK
+      width: 240,
+      height: 160,
+    })),
+    edges: edges,
+  };
+
+  const layoutedGraph = await elk.layout(graph);
+
+  const layoutedNodes = nodes.map((node) => {
+    const layoutedNode = layoutedGraph.children?.find((lgNode) => lgNode.id === node.id);
+    if (layoutedNode) {
+      node.position = {
+        x: layoutedNode.x ?? 0,
+        y: layoutedNode.y ?? 0,
+      };
+    }
+    return node;
+  });
+
+  return { nodes: layoutedNodes, edges };
+};
+
 const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
   const { fitView } = useReactFlow();
@@ -277,26 +318,9 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
       const verticalSpacing = 400;   // زيادة المسافة العمودية أكثر
       
       // Calculate position
-      let x = parentX;
-      if (isRoot && level === 1) {
-        // For root items, arrange them side by side
-        const totalRootWidth = Math.max((totalSiblings - 1) * horizontalSpacing, 0);
-        const startX = -totalRootWidth / 2;
-        x = startX + (siblingIndex * horizontalSpacing);
-      } else if (level > 1) {
-        // حساب أفضل للمواضع مع مسافات أكبر لتجنب التداخل
-        const totalWidth = Math.max((totalSiblings - 1) * horizontalSpacing, horizontalSpacing * 1.2);
-        const startX = parentX - totalWidth / 2;
-        x = startX + (siblingIndex * horizontalSpacing);
-        
-        // تجنب التداخل مع العقد الموجودة بمسافة أكبر
-        const existingPositions = allNodes.filter(n => Math.abs(n.position.y - ((level - 1) * verticalSpacing)) < 50);
-        while (existingPositions.some(n => Math.abs(n.position.x - x) < 400)) {
-          x += horizontalSpacing * 0.4;
-        }
-      }
-      
-      const y = (level - 1) * verticalSpacing;
+      // Initial position (will be overridden by ELK)
+      const x = siblingIndex * 100;
+      const y = level * 100;
 
       const hasChildren = item.children && item.children.length > 0;
       const isExpanded = expandedNodes.has(itemId);
@@ -396,15 +420,15 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
           padding: 0.15,
           includeHiddenNodes: false,
           minZoom: 0.1,
-          maxZoom: 1.5,
+          maxZoom: 2,
         }}
         minZoom={0.1}
         maxZoom={2}
-        defaultViewport={{ x: 0, y: 0, zoom: 0.4 }}
+        defaultViewport={{ x: 0, y: 0, zoom: 0.5 }}
       >
         <Background 
           color="#e2e8f0" 
-          gap={25} 
+          gap={20} 
           size={1}
           variant="dots"
         />
