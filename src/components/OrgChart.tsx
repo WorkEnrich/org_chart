@@ -265,38 +265,23 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
       processedIds.add(itemId);
 
       const isExpanded = expandedNodes.has(itemId);
-      const isCurrentlyExpanded = isInExpandedBranch || isExpanded;
       
-      // مسافات مختلفة للعقد المتوسعة
-      const horizontalSpacing = isCurrentlyExpanded ? 800 : 400; // مسافة أكبر للعقد المتوسعة
-      const verticalSpacing = isCurrentlyExpanded ? 500 : 300;   // مسافة أكبر عمودياً
+      // مسافات ثابتة للتخطيط الهرمي
+      const horizontalSpacing = 350; // مسافة ثابتة بين العقد أفقياً
+      const verticalSpacing = 180;   // مسافة ثابتة بين المستويات عمودياً
       
       // Calculate position
       let x = parentX;
       if (isRoot && level === 1) {
-        // For root items, arrange them side by side
+        // ترتيب العقد الجذرية جنباً إلى جنب
         const totalRootWidth = Math.max((totalSiblings - 1) * horizontalSpacing, 0);
         const startX = -totalRootWidth / 2;
         x = startX + (siblingIndex * horizontalSpacing);
       } else if (level > 1) {
-        // حساب المواضع مع مسافات أكبر للعقد المتوسعة
+        // حساب المواضع للمستويات الفرعية
         const totalWidth = Math.max((totalSiblings - 1) * horizontalSpacing, horizontalSpacing * 1.2);
         const startX = parentX - totalWidth / 2;
         x = startX + (siblingIndex * horizontalSpacing);
-        
-        // إضافة مسافة إضافية للعقد المتوسعة لفصلها عن باقي الشجرة
-        if (isCurrentlyExpanded) {
-          // تجنب التداخل مع العقد الموجودة بمسافة أكبر
-          const existingPositions = allNodes.filter(n => Math.abs(n.position.y - ((level - 1) * verticalSpacing)) < 100);
-          while (existingPositions.some(n => Math.abs(n.position.x - x) < 600)) {
-            x += horizontalSpacing * 0.3;
-          }
-          
-          // إضافة مسافة جانبية إضافية للفصل
-          if (siblingIndex > 0) {
-            x += 200; // مسافة إضافية للفصل
-          }
-        }
       }
       
       const y = (level - 1) * verticalSpacing;
@@ -351,7 +336,7 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
           });
 
           // Process child recursively
-          processItem(child, level + 1, x, index, item.children!.length, false, itemId, true);
+          processItem(child, level + 1, x, index, item.children!.length, false, itemId, false);
         });
       }
     };
@@ -397,16 +382,16 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
         fitViewOptions={{
           padding: 0.15,
           includeHiddenNodes: false,
-          minZoom: 0.05,
+          minZoom: 0.1,
           maxZoom: 1.5,
         }}
-        minZoom={0.05}
+        minZoom={0.1}
         maxZoom={2}
-        defaultViewport={{ x: 0, y: 0, zoom: 0.3 }}
+        defaultViewport={{ x: 0, y: 0, zoom: 0.5 }}
       >
         <Background 
           color="#e2e8f0" 
-          gap={25} 
+          gap={20} 
           size={1}
           variant="dots"
         />
