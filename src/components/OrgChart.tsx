@@ -10,7 +10,6 @@ import ReactFlow, {
   useReactFlow,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import ELK from 'elkjs/lib/elk.bundled.js';
 import { Employee } from '../types/Employee';
 import EmployeeNode from './EmployeeNode';
 import { getLevelColor, getCardBorderColor } from '../utils/orgChartUtils';
@@ -24,46 +23,10 @@ const nodeTypes = {
   employee: EmployeeNode,
 };
 
-const elk = new ELK();
-
-// ELK layout options
-const elkOptions = {
-  'elk.algorithm': 'layered',
-  'elk.layered.spacing.nodeNodeBetweenLayers': '100',
-  'elk.spacing.nodeNode': '80',
-  'elk.direction': 'DOWN',
-  'elk.layered.nodePlacement.strategy': 'SIMPLE',
-};
-
-const getLayoutedElements = async (nodes: Node[], edges: Edge[]) => {
-  const isHorizontal = elkOptions['elk.direction'] === 'RIGHT';
-  const graph = {
-    id: 'root',
-    layoutOptions: elkOptions,
-    children: nodes.map((node) => ({
-      ...node,
-      // Calculate the width and height of nodes for ELK
-      width: 240,
-      height: 160,
-    })),
-    edges: edges,
-  };
-
-  const layoutedGraph = await elk.layout(graph);
-
-  const layoutedNodes = nodes.map((node) => {
-    const layoutedNode = layoutedGraph.children?.find((lgNode) => lgNode.id === node.id);
-    if (layoutedNode) {
-      node.position = {
-        x: layoutedNode.x ?? 0,
-        y: layoutedNode.y ?? 0,
-      };
-    }
-    return node;
-  });
-
-  return { nodes: layoutedNodes, edges };
-};
+// Auto layout configuration
+const HORIZONTAL_SPACING = 300;
+const VERTICAL_SPACING = 200;
+const NODE_WIDTH = 240;
 
 const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
@@ -308,20 +271,35 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
     console.log('🌳 Found root items:', rootItems.length);
     
     // Function to recursively process items
-    const processItem = (item: any, level: number, parentX: number = 0, siblingIndex: number = 0, totalSiblings: number = 1, isRoot: boolean = false, parentId: string = '') => {
+    const processItem = (item: any, level: number, siblingIndex: number = 0, totalSiblings: number = 1, isRoot: boolean = false, parentId: string = '', parentX: number = 0) => {
       // Generate unique ID based on hierarchy position
       const itemId = generateItemId(item, parentId, siblingIndex);
       
       if (processedIds.has(itemId)) return;
       processedIds.add(itemId);
 
-      const horizontalSpacing = 600; // زيادة المسافة الأفقية أكثر
-      const verticalSpacing = 400;   // زيادة المسافة العمودية أكثر
-      
       // Calculate position
-      // Initial position (will be overridden by ELK)
-      const x = siblingIndex * 100;
-      const y = level * 100;
+      let x: number;
+      let y: number;
+      
+      if (isRoot) {
+        // Root nodes positioned side by side
+        x = siblingIndex * (NODE_WIDTH + HORIZONTAL_SPACING);
+        y = 0;
+      } else {
+        // Child nodes positioned relative to parent
+        y = level * VERTICAL_SPACING;
+        
+        if (totalSiblings === 1) {
+          // Single child centered under parent
+          x = parentX;
+        } else {
+          // Multiple children spread horizontally
+          const totalWidth = (totalSiblings - 1) * HORIZONTAL_SPACING;
+          const startX = parentX - totalWidth / 2;
+          x = startX + siblingIndex * HORIZONTAL_SPACING;
+        }
+      }
 
       const hasChildren = item.children && item.children.length > 0;
       const isExpanded = expandedNodes.has(itemId);
@@ -374,14 +352,14 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
           });
 
           // Process child recursively
-          processItem(child, level + 1, x, index, item.children!.length, false, itemId);
+          processItem(child, level + 1, index, item.children!.length, false, itemId, x);
         });
       }
     };
 
     // Process all root items side by side
     rootItems.forEach((item, index) => {
-      processItem(item, 1, 0, index, rootItems.length, true, '');
+      processItem(item, 0, index, rootItems.length, true, '', 0);
     });
 
     console.log('📊 Generated nodes:', allNodes.length);
