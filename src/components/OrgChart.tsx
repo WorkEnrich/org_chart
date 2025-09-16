@@ -27,6 +27,15 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
   const { fitView } = useReactFlow();
 
+  // Helper function to get item ID based on chart type
+  const getItemId = (item: any, type: 'orgChart' | 'companyChart'): string => {
+    if (type === 'orgChart') {
+      return item.job_title_code || item.id || item.name;
+    } else {
+      return item.id?.toString() || item.code || item.name;
+    }
+  };
+
   // Update expanded nodes when data changes
   useEffect(() => {
     if (chartData) {
@@ -45,15 +54,6 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
       }
     }
   }, [chartData, chartType]);
-
-  // Helper function to get item ID based on chart type
-  const getItemId = (item: any, type: 'orgChart' | 'companyChart'): string => {
-    if (type === 'orgChart') {
-      return item.job_title_code || item.id || item.name;
-    } else {
-      return item.id?.toString() || item.code || item.name;
-    }
-  };
 
   // Listen for external events
   useEffect(() => {
