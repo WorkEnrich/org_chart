@@ -273,8 +273,8 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
       if (processedIds.has(itemId)) return;
       processedIds.add(itemId);
 
-      const horizontalSpacing = 600; // زيادة المسافة الأفقية أكثر
-      const verticalSpacing = 400;   // زيادة المسافة العمودية أكثر
+      const horizontalSpacing = 300; // مسافة أفقية مناسبة للبنية الشجرية
+      const verticalSpacing = 200;   // مسافة عمودية أقل للبنية المدمجة
       
       // Calculate position
       let x = parentX;
@@ -284,16 +284,10 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
         const startX = -totalRootWidth / 2;
         x = startX + (siblingIndex * horizontalSpacing);
       } else if (level > 1) {
-        // حساب أفضل للمواضع مع مسافات أكبر لتجنب التداخل
-        const totalWidth = Math.max((totalSiblings - 1) * horizontalSpacing, horizontalSpacing * 1.2);
+        // حساب المواضع للبنية الشجرية
+        const totalWidth = Math.max((totalSiblings - 1) * horizontalSpacing, 0);
         const startX = parentX - totalWidth / 2;
         x = startX + (siblingIndex * horizontalSpacing);
-        
-        // تجنب التداخل مع العقد الموجودة بمسافة أكبر
-        const existingPositions = allNodes.filter(n => Math.abs(n.position.y - ((level - 1) * verticalSpacing)) < 50);
-        while (existingPositions.some(n => Math.abs(n.position.x - x) < 400)) {
-          x += horizontalSpacing * 0.4;
-        }
       }
       
       const y = (level - 1) * verticalSpacing;
@@ -333,17 +327,17 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
             id: `edge-${itemId}-${childId}`,
             source: itemId,
             target: childId,
-            type: 'smoothstep',
+            type: 'step',
             animated: false,
             style: {
               stroke: itemColors.borderColor,
-              strokeWidth: 4,
+              strokeWidth: 2,
               strokeDasharray: '0',
             },
             markerEnd: {
               type: 'arrowclosed',
-              width: 20,
-              height: 20,
+              width: 15,
+              height: 15,
               color: itemColors.borderColor,
             },
           });
@@ -400,13 +394,13 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
         }}
         minZoom={0.1}
         maxZoom={2}
-        defaultViewport={{ x: 0, y: 0, zoom: 0.4 }}
+        defaultViewport={{ x: 0, y: 0, zoom: 0.6 }}
       >
         <Background 
           color="#e2e8f0" 
-          gap={25} 
+          gap={20} 
           size={1}
-          variant="dots"
+          variant="lines"
         />
         <Controls 
           position="top-right"
