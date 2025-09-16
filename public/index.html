@@ -16,7 +16,8 @@
       window.addEventListener('OrgChartReady', function() {
         console.log('🎉 OrgChart API is ready! (API-Only Mode)');
         console.log('📋 Available functions:');
-        console.log('- window.OrgChartAPI.init(companyData) - Initialize chart');
+        console.log('- window.OrgChartAPI.setData(companyData, chartType) - Set chart data');
+        console.log('- window.OrgChartAPI.init(companyData) - Legacy support (use setData instead)');
         console.log('- window.OrgChartAPI.clearChart() - Clear chart');
         console.log('- window.OrgChartAPI.updateCompanyData(data) - Update data');
         console.log('- window.OrgChartAPI.searchEmployee(term) - Search');
@@ -26,8 +27,12 @@
         console.log('- window.OrgChartAPI.getStats() - Get statistics');
         
         // Listen to chart events
+        window.addEventListener('OrgChartDataSet', function(e) {
+          console.log('✅ Chart data set:', e.detail);
+        });
+        
         window.addEventListener('OrgChartInitialized', function(e) {
-          console.log('✅ Chart initialized:', e.detail);
+          console.log('✅ Chart initialized (legacy event):', e.detail);
         });
         
         window.addEventListener('OrgChartUpdated', function(e) {
@@ -116,7 +121,7 @@
             ]
           };
           
-          window.OrgChartAPI.init(companyData, 'orgChart');
+          window.OrgChartAPI.setData(companyData, 'orgChart');
         };
         
         window.testOrgChart = function() {
@@ -145,7 +150,7 @@
             }
           ];
           
-          window.OrgChartAPI.init(orgData, 'orgChart');
+          window.OrgChartAPI.setData(orgData, 'orgChart');
         };
         
         window.testCompanyChart = function() {
@@ -202,7 +207,7 @@
             }
           ];
           
-          window.OrgChartAPI.init(companyData, 'companyChart');
+          window.OrgChartAPI.setData(companyData, 'companyChart');
         };
         
         window.testSimple = function() {
@@ -218,7 +223,7 @@
             children: []
           };
           
-          window.OrgChartAPI.init(simpleData, 'orgChart');
+          window.OrgChartAPI.setData(simpleData, 'orgChart');
         };
         
         window.clearChart = function() {

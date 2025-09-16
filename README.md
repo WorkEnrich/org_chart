@@ -18,17 +18,17 @@
 ```javascript
 // انتظار جاهزية API
 window.addEventListener('OrgChartReady', function() {
-  // تهيئة المخطط بالبيانات
-  window.OrgChartAPI.init(employeeData);
+  // تعيين بيانات المخطط
+  window.OrgChartAPI.setData(employeeData, 'orgChart');
 });
 ```
 
 ### دوال التحكم المتاحة
 
-#### `init(data: Employee[])`
-تهيئة المخطط بالبيانات الأساسية
+#### `setData(data: Employee[], chartType: string)`
+تعيين بيانات المخطط (يحديث المحتوى في كل مرة)
 ```javascript
-window.OrgChartAPI.init([
+window.OrgChartAPI.setData([
   {
     id: 'emp1',
     name: 'أحمد محمد',
@@ -39,7 +39,13 @@ window.OrgChartAPI.init([
     phone: '+966501234567',
     avatar: 'https://example.com/avatar.jpg'
   }
-]);
+], 'orgChart');
+```
+
+#### `init(data: Employee[], chartType: string)` - مهجورة
+دالة قديمة للتوافق مع الإصدارات السابقة (استخدم setData بدلاً منها)
+```javascript
+window.OrgChartAPI.init(employeeData, 'orgChart'); // يعيد التوجيه إلى setData
 ```
 
 #### `updateEmployees(data: Employee[])`
@@ -142,7 +148,7 @@ interface Employee {
 // في useEffect أو componentDidMount
 useEffect(() => {
   if (window.OrgChartAPI) {
-    window.OrgChartAPI.init(employeeData);
+    window.OrgChartAPI.setData(employeeData, 'orgChart');
   }
 }, []);
 ```
@@ -151,7 +157,7 @@ useEffect(() => {
 ```javascript
 mounted() {
   window.addEventListener('OrgChartReady', () => {
-    window.OrgChartAPI.init(this.employees);
+    window.OrgChartAPI.setData(this.employees, 'orgChart');
   });
 }
 ```
@@ -160,7 +166,7 @@ mounted() {
 ```typescript
 ngOnInit() {
   window.addEventListener('OrgChartReady', () => {
-    (window as any).OrgChartAPI.init(this.employees);
+    (window as any).OrgChartAPI.setData(this.employees, 'orgChart');
   });
 }
 ```
@@ -172,7 +178,7 @@ window.addEventListener('OrgChartReady', function() {
   fetch('/api/employees')
     .then(response => response.json())
     .then(data => {
-      window.OrgChartAPI.init(data);
+      window.OrgChartAPI.setData(data, 'orgChart');
     });
 });
 </script>
@@ -207,7 +213,7 @@ npm run build
 // التواصل مع iframe
 const iframe = document.querySelector('iframe');
 iframe.onload = function() {
-  iframe.contentWindow.OrgChartAPI.init(yourEmployeeData);
+  iframe.contentWindow.OrgChartAPI.setData(yourEmployeeData, 'orgChart');
 };
 </script>
 ```

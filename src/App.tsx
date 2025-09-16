@@ -91,12 +91,12 @@ function App() {
     
     // Create the global API object
     window.OrgChartAPI = {
-      // Initialize with data and chart type
-      init: (data: any, type: 'orgChart' | 'companyChart' = 'orgChart') => {
-        console.log(`🚀 Chart.init() called with ${type} data:`, data);
+      // Set data and chart type
+      setData: (data: any, type: 'orgChart' | 'companyChart' = 'orgChart') => {
+        console.log(`🚀 Chart.setData() called with ${type} data:`, data);
         
         if (!data || typeof data !== 'object') {
-          console.error('❌ Invalid data provided to init()');
+          console.error('❌ Invalid data provided to setData()');
           alert('❌ خطأ: البيانات المرسلة غير صحيحة');
           return;
         }
@@ -109,9 +109,9 @@ function App() {
         setIsInitialized(true);
         
         const itemCount = getAllItems(data).length;
-        console.log(`✅ ${type} initialized successfully with`, itemCount, 'items');
+        console.log(`✅ ${type} data set successfully with`, itemCount, 'items');
         
-        window.dispatchEvent(new CustomEvent('OrgChartInitialized', { 
+        window.dispatchEvent(new CustomEvent('OrgChartDataSet', { 
           detail: { 
             itemCount,
             chartType: type,
@@ -119,6 +119,12 @@ function App() {
             success: true
           }
         }));
+      },
+
+      // Legacy support - redirect to setData
+      init: (data: any, type: 'orgChart' | 'companyChart' = 'orgChart') => {
+        console.log('⚠️ init() is deprecated, use setData() instead');
+        window.OrgChartAPI.setData(data, type);
       },
 
       // Update data

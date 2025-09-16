@@ -7,8 +7,8 @@
 window.addEventListener('OrgChartReady', function() {
   console.log('✅ OrgChart API جاهز للاستخدام');
   
-  // تهيئة المخطط بالبيانات
-  window.OrgChartAPI.init(employeeData);
+  // تعيين بيانات المخطط
+  window.OrgChartAPI.setData(employeeData, 'orgChart');
 });
 ```
 
@@ -86,44 +86,51 @@ const employeeData = [
 
 ## 🎛️ جميع الدوال المتاحة
 
-### 1. `init(data: Employee[])`
-**الوصف:** تهيئة المخطط بالبيانات الأساسية
+### 1. `setData(data: Employee[], chartType: string)`
+**الوصف:** تعيين بيانات المخطط (يحديث المحتوى في كل مرة)
 ```javascript
-window.OrgChartAPI.init(employeeData);
+window.OrgChartAPI.setData(employeeData, 'orgChart');
+window.OrgChartAPI.setData(companyData, 'companyChart');
 ```
 
-### 2. `updateEmployees(data: Employee[])`
+### 2. `init(data: Employee[], chartType: string)` - مهجورة
+**الوصف:** دالة قديمة للتوافق مع الإصدارات السابقة
+```javascript
+window.OrgChartAPI.init(employeeData, 'orgChart'); // يعيد التوجيه إلى setData
+```
+
+### 3. `updateEmployees(data: Employee[])`
 **الوصف:** تحديث بيانات الموظفين بالكامل
 ```javascript
 const newData = [...employeeData, newEmployee];
 window.OrgChartAPI.updateEmployees(newData);
 ```
 
-### 3. `expandNode(nodeId: string)`
+### 4. `expandNode(nodeId: string)`
 **الوصف:** توسيع عقدة محددة لإظهار التابعين
 ```javascript
 window.OrgChartAPI.expandNode('ceo-001');
 ```
 
-### 4. `collapseNode(nodeId: string)`
+### 5. `collapseNode(nodeId: string)`
 **الوصف:** طي عقدة محددة لإخفاء التابعين
 ```javascript
 window.OrgChartAPI.collapseNode('cto-001');
 ```
 
-### 5. `expandAll()`
+### 6. `expandAll()`
 **الوصف:** توسيع جميع العقد في المخطط
 ```javascript
 window.OrgChartAPI.expandAll();
 ```
 
-### 6. `collapseAll()`
+### 7. `collapseAll()`
 **الوصف:** طي جميع العقد في المخطط
 ```javascript
 window.OrgChartAPI.collapseAll();
 ```
 
-### 7. `searchEmployee(searchTerm: string)`
+### 8. `searchEmployee(searchTerm: string)`
 **الوصف:** البحث عن موظف بالاسم أو المنصب أو البريد
 ```javascript
 window.OrgChartAPI.searchEmployee('أحمد');
@@ -131,7 +138,7 @@ window.OrgChartAPI.searchEmployee('مطور');
 window.OrgChartAPI.searchEmployee('ahmed@company.com');
 ```
 
-### 8. `filterByDepartment(department: string)`
+### 9. `filterByDepartment(department: string)`
 **الوصف:** تصفية الموظفين حسب القسم
 ```javascript
 window.OrgChartAPI.filterByDepartment('Engineering');
@@ -139,13 +146,13 @@ window.OrgChartAPI.filterByDepartment('Marketing');
 window.OrgChartAPI.filterByDepartment('Sales');
 ```
 
-### 9. `resetFilters()`
+### 10. `resetFilters()`
 **الوصف:** إعادة تعيين جميع المرشحات والبحث
 ```javascript
 window.OrgChartAPI.resetFilters();
 ```
 
-### 10. `getStats()`
+### 11. `getStats()`
 **الوصف:** الحصول على إحصائيات المخطط
 ```javascript
 const stats = window.OrgChartAPI.getStats();
@@ -160,7 +167,7 @@ console.log(stats);
 }
 ```
 
-### 11. `focusOnEmployee(employeeId: string)`
+### 12. `focusOnEmployee(employeeId: string)`
 **الوصف:** التركيز على موظف محدد وتوسيع المسار إليه
 ```javascript
 window.OrgChartAPI.focusOnEmployee('dev-001');
@@ -196,7 +203,7 @@ window.OrgChartAPI.focusOnEmployee('dev-001');
         fetch('/api/employees')
             .then(response => response.json())
             .then(data => {
-                window.OrgChartAPI.init(data);
+                window.OrgChartAPI.setData(data, 'orgChart');
             });
     });
     </script>
@@ -236,7 +243,7 @@ window.addEventListener('OrgChartReady', function() {
     fetch('{% url "org_chart_data" %}')
         .then(response => response.json())
         .then(data => {
-            window.OrgChartAPI.init(data);
+            window.OrgChartAPI.setData(data, 'orgChart');
         });
 });
 </script>
@@ -273,7 +280,7 @@ window.addEventListener('OrgChartReady', function() {
     fetch('/api/employees')
         .then(response => response.json())
         .then(data => {
-            window.OrgChartAPI.init(data);
+            window.OrgChartAPI.setData(data, 'orgChart');
         });
 });
 </script>
@@ -305,7 +312,7 @@ function MyComponent() {
     
     return (
         <iframe 
-            src="https://your-org-chart-url.com" 
+            window.OrgChartAPI.setData(employees, 'orgChart');
             width="100%" 
             height="600px"
         />
@@ -322,7 +329,7 @@ setInterval(() => {
     fetch('/api/employees')
         .then(response => response.json())
         .then(data => {
-            window.OrgChartAPI.updateEmployees(data);
+            window.OrgChartAPI.setData(data, 'orgChart');
         });
 }, 30000);
 ```
