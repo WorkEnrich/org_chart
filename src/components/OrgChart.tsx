@@ -87,10 +87,30 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
         }
       }
       setExpandedNodes(allIds);
+      
+      // Auto zoom out when expanding all to show everything
+      setTimeout(() => {
+        fitView({ 
+          padding: 0.15, 
+          includeHiddenNodes: false,
+          duration: 1000,
+          maxZoom: 0.5
+        });
+      }, 200);
     };
 
     const handleCollapseAll = () => {
       setExpandedNodes(new Set());
+      
+      // Auto zoom in when collapsing all
+      setTimeout(() => {
+        fitView({ 
+          padding: 0.2, 
+          includeHiddenNodes: false,
+          duration: 800,
+          maxZoom: 1.2
+        });
+      }, 100);
     };
 
     const handleFocusOnEmployee = (event: CustomEvent) => {
@@ -168,6 +188,16 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
       } else {
         newSet.add(nodeId);
         console.log('✅ Expanding node:', nodeId);
+        
+        // Auto zoom out when expanding to show all content
+        setTimeout(() => {
+          fitView({ 
+            padding: 0.2, 
+            includeHiddenNodes: false,
+            duration: 800,
+            maxZoom: 0.8
+          });
+        }, 100);
       }
       console.log('📊 Expanded nodes:', Array.from(newSet));
       return newSet;
