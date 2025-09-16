@@ -23,11 +23,6 @@ const nodeTypes = {
   employee: EmployeeNode,
 };
 
-// Auto layout configuration
-const HORIZONTAL_SPACING = 300;
-const VERTICAL_SPACING = 200;
-const NODE_WIDTH = 240;
-
 const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
   const { fitView } = useReactFlow();
@@ -271,35 +266,37 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
     console.log('🌳 Found root items:', rootItems.length);
     
     // Function to recursively process items
-    const processItem = (item: any, level: number, siblingIndex: number = 0, totalSiblings: number = 1, isRoot: boolean = false, parentId: string = '', parentX: number = 0) => {
+    const processItem = (item: any, level: number, parentX: number = 0, siblingIndex: number = 0, totalSiblings: number = 1, isRoot: boolean = false, parentId: string = '') => {
       // Generate unique ID based on hierarchy position
       const itemId = generateItemId(item, parentId, siblingIndex);
       
       if (processedIds.has(itemId)) return;
       processedIds.add(itemId);
 
-      // Calculate position
-      let x: number;
-      let y: number;
+      const horizontalSpacing = 600; // زيادة المسافة الأفقية أكثر
+      const verticalSpacing = 400;   // زيادة المسافة العمودية أكثر
       
-      if (isRoot) {
-        // Root nodes positioned side by side
-        x = siblingIndex * (NODE_WIDTH + HORIZONTAL_SPACING);
-        y = 0;
-      } else {
-        // Child nodes positioned relative to parent
-        y = level * VERTICAL_SPACING;
+      // Calculate position
+      let x = parentX;
+      if (isRoot && level === 1) {
+        // For root items, arrange them side by side
+        const totalRootWidth = Math.max((totalSiblings - 1) * horizontalSpacing, 0);
+        const startX = -totalRootWidth / 2;
+        x = startX + (siblingIndex * horizontalSpacing);
+      } else if (level > 1) {
+        // حساب أفضل للمواضع مع مسافات أكبر لتجنب التداخل
+        const totalWidth = Math.max((totalSiblings - 1) * horizontalSpacing, horizontalSpacing * 1.2);
+        const startX = parentX - totalWidth / 2;
+        x = startX + (siblingIndex * horizontalSpacing);
         
-        if (totalSiblings === 1) {
-          // Single child centered under parent
-          x = parentX;
-        } else {
-          // Multiple children spread horizontally
-          const totalWidth = (totalSiblings - 1) * HORIZONTAL_SPACING;
-          const startX = parentX - totalWidth / 2;
-          x = startX + siblingIndex * HORIZONTAL_SPACING;
+        // تجنب التداخل مع العقد الموجودة بمسافة أكبر
+        const existingPositions = allNodes.filter(n => Math.abs(n.position.y - ((level - 1) * verticalSpacing)) < 50);
+        while (existingPositions.some(n => Math.abs(n.position.x - x) < 400)) {
+          x += horizontalSpacing * 0.4;
         }
       }
+      
+      const y = (level - 1) * verticalSpacing;
 
       const hasChildren = item.children && item.children.length > 0;
       const isExpanded = expandedNodes.has(itemId);
@@ -352,14 +349,14 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
           });
 
           // Process child recursively
-          processItem(child, level + 1, index, item.children!.length, false, itemId, x);
+          processItem(child, level + 1, x, index, item.children!.length, false, itemId);
         });
       }
     };
 
     // Process all root items side by side
     rootItems.forEach((item, index) => {
-      processItem(item, 0, index, rootItems.length, true, '', 0);
+      processItem(item, 1, 0, index, rootItems.length, true, '');
     });
 
     console.log('📊 Generated nodes:', allNodes.length);
@@ -399,15 +396,15 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
           padding: 0.15,
           includeHiddenNodes: false,
           minZoom: 0.1,
-          maxZoom: 2,
+          maxZoom: 1.5,
         }}
         minZoom={0.1}
         maxZoom={2}
-        defaultViewport={{ x: 0, y: 0, zoom: 0.5 }}
+        defaultViewport={{ x: 0, y: 0, zoom: 0.4 }}
       >
         <Background 
           color="#e2e8f0" 
-          gap={20} 
+          gap={25} 
           size={1}
           variant="dots"
         />
