@@ -3,7 +3,7 @@
 ## 🎯 **مثال بسيط - موظف واحد (الجذر)**
 
 ```javascript
-window.OrgChartAPI.init([
+window.OrgChartAPI.setData([
   {
     id: "ceo-001",
     name: "سارة أحمد محمد",
@@ -14,13 +14,13 @@ window.OrgChartAPI.init([
     phone: "+966501234567",
     avatar: "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop"
   }
-]);
+], 'orgChart');
 ```
 
 ## 🏢 **مثال متوسط - هيكل إداري (3 مستويات)**
 
 ```javascript
-window.OrgChartAPI.init([
+window.OrgChartAPI.setData([
   // المدير التنفيذي
   {
     id: "ceo-001",
@@ -82,13 +82,13 @@ window.OrgChartAPI.init([
     avatar: "https://images.pexels.com/photos/1130626/pexels-photo-1130626.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop",
     managerId: "cmo-001"
   }
-]);
+], 'orgChart');
 ```
 
 ## 🏭 **مثال كامل - شركة متكاملة**
 
 ```javascript
-window.OrgChartAPI.init([
+window.OrgChartAPI.setData([
   // المدير التنفيذي
   {
     id: "ceo-001",
@@ -205,7 +205,7 @@ window.OrgChartAPI.init([
     avatar: "https://images.pexels.com/photos/1056553/pexels-photo-1056553.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop",
     managerId: "marketing-manager-001"
   }
-]);
+], 'orgChart');
 ```
 
 ## 📋 **هيكل البيانات المطلوب**
@@ -243,7 +243,7 @@ const departments = {
 
 ```javascript
 // مثال سريع - جرب في Console
-window.OrgChartAPI.init([
+window.OrgChartAPI.setData([
   {
     id: "test1",
     name: "اسمك هنا",
@@ -254,10 +254,10 @@ window.OrgChartAPI.init([
     phone: "+966501234567",
     avatar: "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg"
   }
-]);
+], 'orgChart');
 
 // إضافة موظف آخر
-window.OrgChartAPI.updateEmployees([
+window.OrgChartAPI.setData([
   {
     id: "test1",
     name: "اسمك هنا",
@@ -279,7 +279,7 @@ window.OrgChartAPI.updateEmployees([
     avatar: "https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg",
     managerId: "test1"
   }
-]);
+], 'orgChart');
 ```
 
 ## ⚠️ **ملاحظات مهمة**
