@@ -150,11 +150,6 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
         </div>
       </div>
 
-      {/* Level Badge */}
-      <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
-        <span className="text-xs font-bold text-gray-600">{displayInfo.code}</span>
-      </div>
-
       {/* Bottom Handle - only show if has children and is expanded */}
       {hasChildren && isExpanded && (
         <Handle
