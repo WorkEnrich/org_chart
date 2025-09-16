@@ -103,7 +103,7 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
       <Handle
         type="target"
         position={Position.Top}
-        className="w-2 h-2 !border-2 !border-white !bg-opacity-80"
+        className="w-3 h-3 !border-2 !border-white !bg-opacity-80"
         style={{ backgroundColor: levelColors.borderColor }}
         style={{ top: -6 }}
       />
@@ -124,7 +124,7 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
                   e.stopPropagation();
                   e.preventDefault();
                 }}
-                className="flex items-center justify-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-all duration-200 mx-auto border relative z-10 hover:scale-105"
+                className="flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 mx-auto border relative z-10 hover:scale-105"
                 style={{
                   backgroundColor: isExpanded ? '#dcfce7' : 
                     levelColors.bgColor.includes('purple') ? '#f3e8ff' :
@@ -139,9 +139,9 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
                   pointerEvents: 'auto'
                 }}
               >
-                <Users className="w-3 h-3" />
+                <Users className="w-4 h-4" />
                 {item.children?.length || 0} {chartType === 'orgChart' ? 'Reports' : 'Items'}
-                {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
               </button>
             </div>
           )}
@@ -153,7 +153,7 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
         <Handle
           type="source"
           position={Position.Bottom}
-          className="w-2 h-2 !border-2 !border-white !bg-opacity-80"
+          className="w-3 h-3 !border-2 !border-white !bg-opacity-80"
           style={{ backgroundColor: levelColors.borderColor, bottom: -6 }}
         />
       )}

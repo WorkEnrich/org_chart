@@ -334,17 +334,17 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
             id: `edge-${itemId}-${childId}`,
             source: itemId,
             target: childId,
-            type: 'straight',
+            type: 'step',
             animated: false,
             style: {
               stroke: itemColors.borderColor,
-              strokeWidth: 2,
+              strokeWidth: 3,
               strokeDasharray: '0',
             },
             markerEnd: {
               type: 'arrowclosed',
-              width: 10,
-              height: 10,
+              width: 15,
+              height: 15,
               color: itemColors.borderColor,
             },
           });
@@ -401,13 +401,13 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
         }}
         minZoom={0.1}
         maxZoom={2}
-        defaultViewport={{ x: 0, y: 0, zoom: 0.7 }}
+        defaultViewport={{ x: 0, y: 0, zoom: 0.6 }}
       >
         <Background 
           color="#e2e8f0" 
-          gap={20} 
+          gap={30} 
           size={1}
-          variant="lines"
+          variant="dots"
         />
         <Controls 
           position="top-right"
