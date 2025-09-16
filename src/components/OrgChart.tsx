@@ -168,15 +168,6 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
       } else {
         newSet.add(nodeId);
         console.log('✅ Expanding node:', nodeId);
-        // Zoom out when expanding to show new content
-        setTimeout(() => {
-          fitView({ 
-            padding: 0.2, 
-            includeHiddenNodes: false,
-            duration: 800,
-            maxZoom: 0.8
-          });
-        }, 100);
       }
       console.log('📊 Expanded nodes:', Array.from(newSet));
       return newSet;
@@ -266,15 +257,19 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
     console.log('🌳 Found root items:', rootItems.length);
     
     // Function to recursively process items
-    const processItem = (item: any, level: number, parentX: number = 0, siblingIndex: number = 0, totalSiblings: number = 1, isRoot: boolean = false, parentId: string = '') => {
+    const processItem = (item: any, level: number, parentX: number = 0, siblingIndex: number = 0, totalSiblings: number = 1, isRoot: boolean = false, parentId: string = '', isInExpandedBranch: boolean = false) => {
       // Generate unique ID based on hierarchy position
       const itemId = generateItemId(item, parentId, siblingIndex);
       
       if (processedIds.has(itemId)) return;
       processedIds.add(itemId);
 
-      const horizontalSpacing = 600; // زيادة المسافة الأفقية أكثر
-      const verticalSpacing = 400;   // زيادة المسافة العمودية أكثر
+      const isExpanded = expandedNodes.has(itemId);
+      const isCurrentlyExpanded = isInExpandedBranch || isExpanded;
+      
+      // مسافات مختلفة للعقد المتوسعة
+      const horizontalSpacing = isCurrentlyExpanded ? 800 : 400; // مسافة أكبر للعقد المتوسعة
+      const verticalSpacing = isCurrentlyExpanded ? 500 : 300;   // مسافة أكبر عمودياً
       
       // Calculate position
       let x = parentX;
@@ -284,22 +279,29 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
         const startX = -totalRootWidth / 2;
         x = startX + (siblingIndex * horizontalSpacing);
       } else if (level > 1) {
-        // حساب أفضل للمواضع مع مسافات أكبر لتجنب التداخل
+        // حساب المواضع مع مسافات أكبر للعقد المتوسعة
         const totalWidth = Math.max((totalSiblings - 1) * horizontalSpacing, horizontalSpacing * 1.2);
         const startX = parentX - totalWidth / 2;
         x = startX + (siblingIndex * horizontalSpacing);
         
-        // تجنب التداخل مع العقد الموجودة بمسافة أكبر
-        const existingPositions = allNodes.filter(n => Math.abs(n.position.y - ((level - 1) * verticalSpacing)) < 50);
-        while (existingPositions.some(n => Math.abs(n.position.x - x) < 400)) {
-          x += horizontalSpacing * 0.4;
+        // إضافة مسافة إضافية للعقد المتوسعة لفصلها عن باقي الشجرة
+        if (isCurrentlyExpanded) {
+          // تجنب التداخل مع العقد الموجودة بمسافة أكبر
+          const existingPositions = allNodes.filter(n => Math.abs(n.position.y - ((level - 1) * verticalSpacing)) < 100);
+          while (existingPositions.some(n => Math.abs(n.position.x - x) < 600)) {
+            x += horizontalSpacing * 0.3;
+          }
+          
+          // إضافة مسافة جانبية إضافية للفصل
+          if (siblingIndex > 0) {
+            x += 200; // مسافة إضافية للفصل
+          }
         }
       }
       
       const y = (level - 1) * verticalSpacing;
 
       const hasChildren = item.children && item.children.length > 0;
-      const isExpanded = expandedNodes.has(itemId);
 
       // Get unique color for this item - تمرير parentId للمزيد من التفرد
       const itemColors = getUniqueItemColor(item, chartType, siblingIndex, level, parentId);
@@ -349,14 +351,14 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
           });
 
           // Process child recursively
-          processItem(child, level + 1, x, index, item.children!.length, false, itemId);
+          processItem(child, level + 1, x, index, item.children!.length, false, itemId, true);
         });
       }
     };
 
     // Process all root items side by side
     rootItems.forEach((item, index) => {
-      processItem(item, 1, 0, index, rootItems.length, true, '');
+      processItem(item, 1, 0, index, rootItems.length, true, '', false);
     });
 
     console.log('📊 Generated nodes:', allNodes.length);
@@ -395,12 +397,12 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
         fitViewOptions={{
           padding: 0.15,
           includeHiddenNodes: false,
-          minZoom: 0.1,
+          minZoom: 0.05,
           maxZoom: 1.5,
         }}
-        minZoom={0.1}
+        minZoom={0.05}
         maxZoom={2}
-        defaultViewport={{ x: 0, y: 0, zoom: 0.4 }}
+        defaultViewport={{ x: 0, y: 0, zoom: 0.3 }}
       >
         <Background 
           color="#e2e8f0" 
