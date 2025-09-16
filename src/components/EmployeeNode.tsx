@@ -5,24 +5,62 @@ import { getCardBorderColor } from '../utils/orgChartUtils';
 import { Users, ChevronDown, ChevronRight } from 'lucide-react';
 
 interface EmployeeNodeData {
-  employee: Employee;
+  item: any;
+  chartType: 'orgChart' | 'companyChart';
   hasChildren?: boolean;
   isExpanded?: boolean;
   onToggleExpand?: () => void;
 }
 
 const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
-  const { employee, hasChildren, isExpanded, onToggleExpand } = data;
-  const levelColors = getCardBorderColor(employee.jobTitleCode, employee.level);
+  const { item, chartType, hasChildren, isExpanded, onToggleExpand } = data;
+  
+  // Get colors based on chart type
+  const getItemColors = () => {
+    if (chartType === 'orgChart') {
+      const code = item.job_title_code ? item.job_title_code.hashCode() : item.name.hashCode();
+      return getCardBorderColor(Math.abs(code), item.level || item.job_level || 'Staff');
+    } else {
+      const id = item.id || item.name.hashCode();
+      return getCardBorderColor(Math.abs(id), item.type || 'company');
+    }
+  };
+  
+  const levelColors = getItemColors();
+
+  // Get display information based on chart type
+  const getDisplayInfo = () => {
+    if (chartType === 'orgChart') {
+      return {
+        name: item.name,
+        position: item.position,
+        code: item.job_title_code,
+        level: item.level || item.job_level
+      };
+    } else {
+      return {
+        name: item.name,
+        position: item.type === 'company' ? `${item.number_employees} employees` : 
+                 item.type === 'branch' ? `Location: ${item.location}` :
+                 item.type === 'department' ? 'Department' :
+                 item.type === 'section' ? 'Section' :
+                 item.type === 'job_title' ? `Level: ${item.level}` : item.type,
+        code: item.code || item.id,
+        level: item.type
+      };
+    }
+  };
+  
+  const displayInfo = getDisplayInfo();
 
   const handleExpandClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
     e.nativeEvent.stopImmediatePropagation();
-    console.log('🖱️ Expand button clicked for:', employee.name, 'Has children:', hasChildren, 'Current expanded:', isExpanded);
+    console.log('🖱️ Expand button clicked for:', displayInfo.name, 'Has children:', hasChildren, 'Current expanded:', isExpanded);
     
     if (onToggleExpand && hasChildren) {
-      console.log('🔄 Calling toggle function for:', employee.id);
+      console.log('🔄 Calling toggle function for:', displayInfo.code);
       onToggleExpand();
     }
   };
@@ -57,9 +95,9 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
       <div className="p-5">
         {/* Employee Info - Centered Layout */}
         <div className="text-center space-y-2">
-          <h3 className="text-lg font-bold text-gray-900 leading-tight">{employee.name}</h3>
-          <p className={`text-sm font-medium ${levelColors.color} leading-tight`}>{employee.position}</p>
-          <p className="text-xs text-gray-500">Code: {employee.jobTitleCode}</p>
+          <h3 className="text-lg font-bold text-gray-900 leading-tight">{displayInfo.name}</h3>
+          <p className={`text-sm font-medium ${levelColors.color} leading-tight`}>{displayInfo.position}</p>
+          <p className="text-xs text-gray-500">Code: {displayInfo.code}</p>
 
           {/* Expand/Collapse Button */}
           {hasChildren && (
@@ -94,7 +132,7 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
               }`}
             >
               <Users className="w-3 h-3" />
-              {employee.children?.length || 0} Reports
+              {item.children?.length || 0} {chartType === 'orgChart' ? 'Reports' : 'Items'}
               {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
             </button>
             </div>
@@ -104,7 +142,7 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
 
       {/* Level Badge */}
       <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
-        <span className="text-xs font-bold text-gray-600">{employee.jobTitleCode}</span>
+        <span className="text-xs font-bold text-gray-600">{displayInfo.code}</span>
       </div>
 
       {/* Bottom Handle - only show if has children and is expanded */}
@@ -118,6 +156,24 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
       )}
     </div>
   );
+};
+
+// Helper function to generate hash code from string
+declare global {
+  interface String {
+    hashCode(): number;
+  }
+}
+
+String.prototype.hashCode = function() {
+  let hash = 0;
+  if (this.length === 0) return hash;
+  for (let i = 0; i < this.length; i++) {
+    const char = this.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return hash;
 };
 
 export default EmployeeNode;

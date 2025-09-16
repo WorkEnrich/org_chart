@@ -22,14 +22,19 @@ export const searchEmployees = (employees: Employee[], searchTerm: string, selec
   return filtered;
 };
 
-export const buildOrgTree = (companyData: Employee): Employee[] => {
-  if (!companyData) {
-    console.log('⚠️ No company data provided to buildOrgTree');
+export const buildOrgTree = (chartData: any, chartType: 'orgChart' | 'companyChart'): any[] => {
+  if (!chartData) {
+    console.log('⚠️ No chart data provided to buildOrgTree');
     return [];
   }
   
-  console.log('🏗️ Building org tree from company data');
-  return [companyData];
+  console.log(`🏗️ Building ${chartType} tree from data`);
+  
+  if (Array.isArray(chartData)) {
+    return chartData;
+  } else {
+    return [chartData];
+  }
 };
 
 export const getLevelColor = (level: string): { color: string; bgColor: string; borderColor: string } => {

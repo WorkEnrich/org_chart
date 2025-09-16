@@ -8,8 +8,8 @@ import OrgChart from './components/OrgChart';
 declare global {
   interface Window {
     OrgChartAPI: {
-      init: (companyData: Employee) => void;
-      updateCompanyData: (companyData: Employee) => void;
+      init: (data: any, chartType: 'orgChart' | 'companyChart') => void;
+      updateData: (data: any, chartType: 'orgChart' | 'companyChart') => void;
       expandNode: (nodeId: string) => void;
       collapseNode: (nodeId: string) => void;
       expandAll: () => void;
@@ -18,121 +18,132 @@ declare global {
       filterByLevel: (level: string) => void;
       resetFilters: () => void;
       getStats: () => any;
-      focusOnEmployee: (jobTitleCode: number) => void;
+      focusOnEmployee: (identifier: string | number) => void;
       clearChart: () => void;
     };
   }
 }
 
 function App() {
-  // البدء بحالة فارغة - لا بيانات افتراضية
-  const [companyData, setCompanyData] = useState<Employee | null>(null);
+  const [chartData, setChartData] = useState<any>(null);
+  const [chartType, setChartType] = useState<'orgChart' | 'companyChart'>('orgChart');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLevel, setSelectedLevel] = useState('');
   const [isInitialized, setIsInitialized] = useState(false);
 
   const filteredData = useMemo(() => {
-    if (!companyData) return null;
+    if (!chartData) return null;
     
-    // For now, return the original data
-    // TODO: Implement filtering logic for hierarchical data
-    return companyData;
-  }, [companyData, searchTerm, selectedLevel]);
+    return chartData;
+  }, [chartData, searchTerm, selectedLevel]);
 
-  const getAllEmployees = (data: Employee | null): Employee[] => {
+  const getAllItems = (data: any): any[] => {
     if (!data) return [];
     
-    const employees: Employee[] = [];
-    const traverse = (emp: Employee) => {
-      employees.push(emp);
-      if (emp.children) {
-        emp.children.forEach(traverse);
+    const items: any[] = [];
+    const traverse = (item: any) => {
+      items.push(item);
+      if (item.children) {
+        item.children.forEach(traverse);
       }
     };
-    traverse(data);
-    return employees;
+    
+    if (Array.isArray(data)) {
+      data.forEach(traverse);
+    } else {
+      traverse(data);
+    }
+    return items;
   };
 
-  const allEmployees = useMemo(() => {
-    return getAllEmployees(companyData);
-  }, [companyData]);
+  const allItems = useMemo(() => {
+    return getAllItems(chartData);
+  }, [chartData]);
 
-  const getLevels = (data: Employee | null): string[] => {
+  const getLevels = (data: any): string[] => {
     if (!data) return [];
     
     const levels = new Set<string>();
-    const traverse = (emp: Employee) => {
-      levels.add(emp.level);
-      if (emp.children) {
-        emp.children.forEach(traverse);
+    const traverse = (item: any) => {
+      if (item.level) levels.add(item.level);
+      if (item.job_level) levels.add(item.job_level);
+      if (item.children) {
+        item.children.forEach(traverse);
       }
     };
-    traverse(data);
+    
+    if (Array.isArray(data)) {
+      data.forEach(traverse);
+    } else {
+      traverse(data);
+    }
     return Array.from(levels);
   };
 
   const orgTree = useMemo(() => {
     if (!filteredData) return [];
-    return buildOrgTree(filteredData);
-  }, [filteredData]);
+    return buildOrgTree(filteredData, chartType);
+  }, [filteredData, chartType]);
 
   // Initialize the API when component mounts
   useEffect(() => {
-    console.log('🚀 Setting up OrgChart API (New Data Structure)...');
+    console.log('🚀 Setting up Chart API (Multi-Type Support)...');
     
     // Create the global API object
     window.OrgChartAPI = {
-      // Initialize with company data
-      init: (data: Employee) => {
-        console.log('🚀 OrgChart.init() called with company data:', data);
+      // Initialize with data and chart type
+      init: (data: any, type: 'orgChart' | 'companyChart' = 'orgChart') => {
+        console.log(`🚀 Chart.init() called with ${type} data:`, data);
         
         if (!data || typeof data !== 'object') {
-          console.error('❌ Invalid company data provided to init()');
+          console.error('❌ Invalid data provided to init()');
           alert('❌ خطأ: البيانات المرسلة غير صحيحة');
           return;
         }
         
-        console.log('📊 Company data:', data);
-        setCompanyData(data);
+        console.log(`📊 ${type} data:`, data);
+        setChartData(data);
+        setChartType(type);
         setSearchTerm('');
         setSelectedLevel('');
         setIsInitialized(true);
         
-        const employeeCount = getAllEmployees(data).length;
-        console.log('✅ Chart initialized successfully with', employeeCount, 'employees');
+        const itemCount = getAllItems(data).length;
+        console.log(`✅ ${type} initialized successfully with`, itemCount, 'items');
         
-        // إرسال إشعار للمطورين
         window.dispatchEvent(new CustomEvent('OrgChartInitialized', { 
           detail: { 
-            employeeCount,
+            itemCount,
+            chartType: type,
             levels: getLevels(data),
             success: true
           }
         }));
       },
 
-      // Update company data
-      updateCompanyData: (data: Employee) => {
-        console.log('🔄 Updating company data:', data);
+      // Update data
+      updateData: (data: any, type: 'orgChart' | 'companyChart' = 'orgChart') => {
+        console.log(`🔄 Updating ${type} data:`, data);
         if (!data || typeof data !== 'object') {
-          console.error('❌ Invalid company data provided to updateCompanyData()');
+          console.error('❌ Invalid data provided to updateData()');
           return;
         }
-        setCompanyData(data);
+        setChartData(data);
+        setChartType(type);
         setIsInitialized(true);
         
-        const employeeCount = getAllEmployees(data).length;
-        console.log('✅ Company data updated successfully');
+        const itemCount = getAllItems(data).length;
+        console.log(`✅ ${type} data updated successfully`);
         
         window.dispatchEvent(new CustomEvent('OrgChartUpdated', { 
-          detail: { employeeCount }
+          detail: { itemCount, chartType: type }
         }));
       },
 
       // Clear chart completely
       clearChart: () => {
         console.log('🗑️ Clearing chart...');
-        setCompanyData(null);
+        setChartData(null);
         setSearchTerm('');
         setSelectedLevel('');
         setIsInitialized(false);
@@ -197,9 +208,10 @@ function App() {
       // Get statistics
       getStats: () => {
         const stats = {
-          totalEmployees: allEmployees.length,
-          levels: getLevels(companyData),
-          filteredCount: allEmployees.length,
+          totalItems: allItems.length,
+          chartType,
+          levels: getLevels(chartData),
+          filteredCount: allItems.length,
           isInitialized,
           hasFilters: !!(searchTerm || selectedLevel)
         };
@@ -207,35 +219,36 @@ function App() {
         return stats;
       },
 
-      // Focus on specific employee
-      focusOnEmployee: (jobTitleCode: number) => {
-        console.log('🎯 Focusing on employee with code:', jobTitleCode);
-        window.dispatchEvent(new CustomEvent('focusOnEmployee', { detail: { jobTitleCode } }));
+      // Focus on specific item
+      focusOnEmployee: (identifier: string | number) => {
+        console.log('🎯 Focusing on item with identifier:', identifier);
+        window.dispatchEvent(new CustomEvent('focusOnEmployee', { detail: { identifier } }));
       }
     };
 
     // Notify that the API is ready
-    console.log('✅ OrgChart API is ready (New Data Structure - Waiting for data...)');
+    console.log('✅ Chart API is ready (Multi-Type Support - Waiting for data...)');
     window.dispatchEvent(new CustomEvent('OrgChartReady'));
 
     // Cleanup
     return () => {
       delete window.OrgChartAPI;
     };
-  }, [allEmployees, isInitialized, searchTerm, selectedLevel, companyData]);
+  }, [allItems, isInitialized, searchTerm, selectedLevel, chartData, chartType]);
 
   // Debug logging
   useEffect(() => {
     console.log('🔍 App State Debug:');
     console.log('- Initialized:', isInitialized);
-    console.log('- Company data:', companyData ? 'Available' : 'None');
-    console.log('- All employees count:', allEmployees.length);
+    console.log('- Chart data:', chartData ? 'Available' : 'None');
+    console.log('- Chart type:', chartType);
+    console.log('- All items count:', allItems.length);
     console.log('- Search term:', searchTerm);
     console.log('- Selected level:', selectedLevel);
-  }, [companyData, allEmployees, searchTerm, selectedLevel, isInitialized]);
+  }, [chartData, allItems, searchTerm, selectedLevel, isInitialized, chartType]);
 
   // Show waiting state if not initialized
-  if (!isInitialized || !companyData) {
+  if (!isInitialized || !chartData) {
     return (
       <div className="w-full h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center max-w-md mx-auto p-8">
@@ -261,7 +274,7 @@ function App() {
   return (
     <ReactFlowProvider>
       <div className="w-full h-screen bg-gray-50">
-        <OrgChart companyData={filteredData} />
+        <OrgChart chartData={filteredData} chartType={chartType} />
       </div>
     </ReactFlowProvider>
   );

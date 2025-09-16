@@ -15,26 +15,45 @@ import EmployeeNode from './EmployeeNode';
 import { getLevelColor, getCardBorderColor } from '../utils/orgChartUtils';
 
 interface OrgChartProps {
-  companyData: Employee | null;
+  chartData: any;
+  chartType: 'orgChart' | 'companyChart';
 }
 
 const nodeTypes = {
   employee: EmployeeNode,
 };
 
-const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
+const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
   const { fitView } = useReactFlow();
 
   // Update expanded nodes when data changes
   useEffect(() => {
-    if (companyData && companyData.firstNode) {
-      // Start with root expanded if it has firstNode flag
-      if (companyData.expanded) {
-        setExpandedNodes(new Set([companyData.jobTitleCode.toString()]));
+    if (chartData) {
+      const rootItems = Array.isArray(chartData) ? chartData : [chartData];
+      const expandedIds = new Set<string>();
+      
+      rootItems.forEach(item => {
+        if (item.firstNode && item.expanded) {
+          const id = getItemId(item, chartType);
+          expandedIds.add(id);
+        }
+      });
+      
+      if (expandedIds.size > 0) {
+        setExpandedNodes(expandedIds);
       }
     }
-  }, [companyData]);
+  }, [chartData, chartType]);
+
+  // Helper function to get item ID based on chart type
+  const getItemId = (item: any, type: 'orgChart' | 'companyChart'): string => {
+    if (type === 'orgChart') {
+      return item.job_title_code || item.id || item.name;
+    } else {
+      return item.id?.toString() || item.code || item.name;
+    }
+  };
 
   // Listen for external events
   useEffect(() => {
@@ -54,17 +73,20 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
 
     const handleExpandAll = () => {
       const allIds = new Set<string>();
-      const collectIds = (emp: Employee) => {
-        allIds.add(emp.jobTitleCode.toString());
-          allIds.add(emp.id);
-          if (emp.children) {
-            emp.children.forEach((child) => {
-              collectIds(child);
-            });
-          }
+      const collectIds = (item: any) => {
+        const id = getItemId(item, chartType);
+        allIds.add(id);
+        if (item.children) {
+          item.children.forEach(collectIds);
+        }
       };
-      if (companyData) {
-        collectIds(companyData);
+      
+      if (chartData) {
+        if (Array.isArray(chartData)) {
+          chartData.forEach(collectIds);
+        } else {
+          collectIds(chartData);
+        }
       }
       setExpandedNodes(allIds);
     };
@@ -74,26 +96,40 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
     };
 
     const handleFocusOnEmployee = (event: CustomEvent) => {
-      const { jobTitleCode } = event.detail;
-      // Expand path to employee
-      const expandPath = (emp: Employee, targetCode: number, path: string[] = []): string[] | null => {
-        const currentPath = [...path, emp.jobTitleCode.toString()];
-        if (emp.jobTitleCode === targetCode) {
+      const { identifier } = event.detail;
+      // Expand path to item
+      const expandPath = (item: any, targetId: string | number, path: string[] = []): string[] | null => {
+        const currentId = getItemId(item, chartType);
+        const currentPath = [...path, currentId];
+        
+        if (currentId === identifier.toString() || 
+            (chartType === 'orgChart' && item.job_title_code === identifier) ||
+            (chartType === 'companyChart' && item.id === identifier)) {
           return currentPath;
         }
-        if (emp.children) {
-          for (const child of emp.children) {
-            const result = expandPath(child, targetCode, currentPath);
+        if (item.children) {
+          for (const child of item.children) {
+            const result = expandPath(child, targetId, currentPath);
             if (result) return result;
           }
         }
         return null;
       };
 
-      if (companyData) {
-        const pathToEmployee = expandPath(companyData, jobTitleCode);
-        if (pathToEmployee) {
-          setExpandedNodes(new Set(pathToEmployee));
+      if (chartData) {
+        let pathToItem: string[] | null = null;
+        
+        if (Array.isArray(chartData)) {
+          for (const item of chartData) {
+            pathToItem = expandPath(item, identifier);
+            if (pathToItem) break;
+          }
+        } else {
+          pathToItem = expandPath(chartData, identifier);
+        }
+        
+        if (pathToItem) {
+          setExpandedNodes(new Set(pathToItem));
           setTimeout(() => {
             fitView({ 
               padding: 0.2, 
@@ -119,10 +155,10 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
       window.removeEventListener('collapseAll', handleCollapseAll);
       window.removeEventListener('focusOnEmployee', handleFocusOnEmployee as EventListener);
     };
-  }, [companyData, fitView]);
+  }, [chartData, chartType, fitView]);
 
-  const toggleExpand = useCallback((jobTitleCode: number) => {
-    const nodeId = jobTitleCode.toString();
+  const toggleExpand = useCallback((item: any) => {
+    const nodeId = getItemId(item, chartType);
     console.log('🔄 Toggling expand for node:', nodeId);
     setExpandedNodes(prev => {
       const newSet = new Set(prev);
@@ -145,25 +181,26 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
       console.log('📊 Expanded nodes:', Array.from(newSet));
       return newSet;
     });
-  }, [fitView]);
+  }, [fitView, chartType]);
 
   // Build nodes and edges
   const { nodes, edges } = useMemo(() => {
-    if (!companyData) {
-      console.log('⚠️ No company data provided');
+    if (!chartData) {
+      console.log('⚠️ No chart data provided');
       return { nodes: [], edges: [] };
     }
     
-    console.log('🔄 Building org chart from company data');
+    console.log(`🔄 Building ${chartType} chart from data`);
     
     const allNodes: Node[] = [];
     const allEdges: Edge[] = [];
-    const processedCodes = new Set<number>();
+    const processedIds = new Set<string>();
     
-    // Function to recursively process employees
-    const processEmployee = (employee: Employee, level: number, parentX: number = 0, siblingIndex: number = 0, totalSiblings: number = 1) => {
-      if (processedCodes.has(employee.jobTitleCode)) return;
-      processedCodes.add(employee.jobTitleCode);
+    // Function to recursively process items
+    const processItem = (item: any, level: number, parentX: number = 0, siblingIndex: number = 0, totalSiblings: number = 1) => {
+      const itemId = getItemId(item, chartType);
+      if (processedIds.has(itemId)) return;
+      processedIds.add(itemId);
 
       const horizontalSpacing = 450; // زيادة المسافة الأفقية
       const verticalSpacing = 350;   // زيادة المسافة العمودية
@@ -185,37 +222,39 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
       
       const y = (level - 1) * verticalSpacing;
 
-      const hasChildren = employee.children && employee.children.length > 0;
-      const isExpanded = expandedNodes.has(employee.jobTitleCode.toString());
+      const hasChildren = item.children && item.children.length > 0;
+      const isExpanded = expandedNodes.has(itemId);
 
-      console.log(`👤 Processing: ${employee.name} (Level ${level}) - Children: ${hasChildren ? employee.children!.length : 0} - Expanded: ${isExpanded}`);
+      console.log(`👤 Processing: ${item.name} (Level ${level}) - Children: ${hasChildren ? item.children!.length : 0} - Expanded: ${isExpanded}`);
 
       // Create node
       allNodes.push({
-        id: employee.jobTitleCode.toString(),
+        id: itemId,
         type: 'employee',
         position: { x, y },
         data: {
-          employee,
+          item,
+          chartType,
           hasChildren,
           isExpanded,
-          onToggleExpand: () => toggleExpand(employee.jobTitleCode),
+          onToggleExpand: () => toggleExpand(item),
         },
         draggable: false,
         selectable: false,
       });
 
       // Process children if expanded
-      if (hasChildren && isExpanded && employee.children) {
-        employee.children.forEach((child, index) => {
-          // Get current employee's border color for the connection line
-          const currentCardColors = getCardBorderColor(employee.jobTitleCode, employee.level);
+      if (hasChildren && isExpanded && item.children) {
+        item.children.forEach((child: any, index: number) => {
+          // Get current item's border color for the connection line
+          const currentCardColors = getItemColor(item, chartType);
           
           // Create edge to child
+          const childId = getItemId(child, chartType);
           allEdges.push({
-            id: `edge-${employee.jobTitleCode}-${child.jobTitleCode}`,
-            source: employee.jobTitleCode.toString(),
-            target: child.jobTitleCode.toString(),
+            id: `edge-${itemId}-${childId}`,
+            source: itemId,
+            target: childId,
             type: 'smoothstep',
             animated: false,
             style: {
@@ -232,19 +271,36 @@ const OrgChart: React.FC<OrgChartProps> = ({ companyData }) => {
           });
 
           // Process child recursively
-          processEmployee(child, level + 1, x, index, employee.children!.length);
+          processItem(child, level + 1, x, index, item.children!.length);
         });
       }
     };
 
-    // Start processing from company data root
-    processEmployee(companyData, 1, 0, 0, 1);
+    // Start processing from chart data root
+    if (Array.isArray(chartData)) {
+      chartData.forEach((item, index) => {
+        processItem(item, 1, index * 500, index, chartData.length);
+      });
+    } else {
+      processItem(chartData, 1, 0, 0, 1);
+    }
 
     console.log('📊 Generated nodes:', allNodes.length);
     console.log('🔗 Generated edges:', allEdges.length);
 
     return { nodes: allNodes, edges: allEdges };
-  }, [companyData, expandedNodes, toggleExpand]);
+  }, [chartData, chartType, expandedNodes, toggleExpand]);
+
+  // Helper function to get item color based on chart type
+  const getItemColor = (item: any, type: 'orgChart' | 'companyChart') => {
+    if (type === 'orgChart') {
+      const code = item.job_title_code ? item.job_title_code.hashCode() : item.name.hashCode();
+      return getCardBorderColor(Math.abs(code), item.level || item.job_level || 'Staff');
+    } else {
+      const id = item.id || item.name.hashCode();
+      return getCardBorderColor(Math.abs(id), item.type || 'company');
+    }
+  };
 
   const [nodesState, setNodes, onNodesChange] = useNodesState([]);
   const [edgesState, setEdges, onEdgesChange] = useEdgesState([]);

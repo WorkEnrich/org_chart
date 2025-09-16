@@ -116,7 +116,93 @@
             ]
           };
           
-          window.OrgChartAPI.init(companyData);
+          window.OrgChartAPI.init(companyData, 'orgChart');
+        };
+        
+        window.testOrgChart = function() {
+          console.log('🧪 Testing with OrgChart data...');
+          
+          const orgData = [
+            {
+              "name": "Joy Ford Joy Ford",
+              "position": "Mobile Engineer",
+              "job_title_code": "T-OD-JT-@-1",
+              "level": "Non-Managerial",
+              "job_level": "Mid Level",
+              "expanded": false,
+              "firstNode": true,
+              "children": []
+            },
+            {
+              "name": "Osama Osama Osama Osama",
+              "position": "Mobile Engineer",
+              "job_title_code": "T-OD-JT-@-2",
+              "level": "Non-Managerial",
+              "job_level": "Mid Level",
+              "expanded": false,
+              "firstNode": true,
+              "children": []
+            }
+          ];
+          
+          window.OrgChartAPI.init(orgData, 'orgChart');
+        };
+        
+        window.testCompanyChart = function() {
+          console.log('🧪 Testing with CompanyChart data...');
+          
+          const companyData = [
+            {
+              "id": 1,
+              "name": "Talent",
+              "number_employees": "1 - 50",
+              "firstNode": true,
+              "type": "company",
+              "expanded": false,
+              "children": [
+                {
+                  "id": 1,
+                  "name": "Cairo",
+                  "code": "T-OD-B-@-1",
+                  "location": "Cairo",
+                  "max_employee": 12,
+                  "type": "branch",
+                  "expanded": false,
+                  "children": [
+                    {
+                      "id": 2,
+                      "name": "IT",
+                      "code": "T-OD-D-@-2",
+                      "type": "department",
+                      "expanded": false,
+                      "children": [
+                        {
+                          "id": 2,
+                          "name": "mobile",
+                          "code": "1",
+                          "type": "section",
+                          "expanded": false,
+                          "children": [
+                            {
+                              "id": 1,
+                              "name": "Mobile Engineer",
+                              "code": "T-OD-JT-@-1",
+                              "type": "job_title",
+                              "level": "Non-Managerial",
+                              "expanded": false,
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ];
+          
+          window.OrgChartAPI.init(companyData, 'companyChart');
         };
         
         window.testSimple = function() {
@@ -132,7 +218,7 @@
             children: []
           };
           
-          window.OrgChartAPI.init(simpleData);
+          window.OrgChartAPI.init(simpleData, 'orgChart');
         };
         
         window.clearChart = function() {
@@ -163,7 +249,7 @@
         
         window.testFocus = function() {
           console.log('🎯 Testing focus on employee...');
-          window.OrgChartAPI.focusOnEmployee(102);
+          window.OrgChartAPI.focusOnEmployee('T-OD-JT-@-1');
         };
         
         window.getStats = function() {
@@ -173,7 +259,9 @@
         };
         
         console.log('🎮 Test functions available:');
-        console.log('- testCompany() - Test with full company data');
+        console.log('- testOrgChart() - Test with OrgChart data');
+        console.log('- testCompanyChart() - Test with CompanyChart data');
+        console.log('- testCompany() - Test with old format data');
         console.log('- testSimple() - Test with simple data');
         console.log('- clearChart() - Clear the chart');
         console.log('- testSearch() - Test search functionality');
