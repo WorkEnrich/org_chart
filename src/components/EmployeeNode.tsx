@@ -112,46 +112,31 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
           {/* Expand/Collapse Button */}
           {hasChildren && (
             <div className="pt-2">
-            <button
-              onClick={handleExpandClick}
-              onMouseDown={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                e.nativeEvent.stopImmediatePropagation();
-              }}
-              onMouseUp={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                e.nativeEvent.stopImmediatePropagation();
-              }}
-              onPointerDown={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                e.nativeEvent.stopImmediatePropagation();
-              }}
-              onPointerUp={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                e.nativeEvent.stopImmediatePropagation();
-              }}
-              style={{ pointerEvents: 'auto', zIndex: 1000 }}
-              className={`flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 mx-auto border`}
-              style={{
-                backgroundColor: isExpanded ? '#dcfce7' : levelColors.bgColor.replace('bg-', '').replace('-50', '') === 'purple' ? '#f3e8ff' :
-                                levelColors.bgColor.replace('bg-', '').replace('-50', '') === 'blue' ? '#dbeafe' :
-                                levelColors.bgColor.replace('bg-', '').replace('-50', '') === 'green' ? '#dcfce7' :
-                                levelColors.bgColor.replace('bg-', '').replace('-50', '') === 'orange' ? '#fed7aa' :
-                                levelColors.bgColor.replace('bg-', '').replace('-50', '') === 'red' ? '#fecaca' :
-                                levelColors.bgColor.replace('bg-', '').replace('-50', '') === 'pink' ? '#fce7f3' :
-                                levelColors.bgColor.replace('bg-', '').replace('-50', '') === 'indigo' ? '#e0e7ff' : '#f3f4f6',
-                color: isExpanded ? '#15803d' : levelColors.borderColor,
-                borderColor: levelColors.borderColor
-              }}
-            >
-              <Users className="w-3 h-3" />
-              {item.children?.length || 0} {chartType === 'orgChart' ? 'Reports' : 'Items'}
-              {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-            </button>
+              <button
+                onClick={handleExpandClick}
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                className="flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 mx-auto border relative z-10"
+                style={{
+                  backgroundColor: isExpanded ? '#dcfce7' : 
+                    levelColors.bgColor.includes('purple') ? '#f3e8ff' :
+                    levelColors.bgColor.includes('blue') ? '#dbeafe' :
+                    levelColors.bgColor.includes('green') ? '#dcfce7' :
+                    levelColors.bgColor.includes('orange') ? '#fed7aa' :
+                    levelColors.bgColor.includes('red') ? '#fecaca' :
+                    levelColors.bgColor.includes('pink') ? '#fce7f3' :
+                    levelColors.bgColor.includes('indigo') ? '#e0e7ff' : '#f3f4f6',
+                  color: isExpanded ? '#15803d' : levelColors.borderColor,
+                  borderColor: levelColors.borderColor,
+                  pointerEvents: 'auto'
+                }}
+              >
+                <Users className="w-3 h-3" />
+                {item.children?.length || 0} {chartType === 'orgChart' ? 'Reports' : 'Items'}
+                {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+              </button>
             </div>
           )}
         </div>
