@@ -293,29 +293,33 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
       // Process children if expanded
       if (hasChildren && isExpanded && item.children) {
         item.children.forEach((child: any, index: number) => {
-          // Get current item's border color for the connection line
-          const currentCardColors = getItemColor(item, chartType);
-          
-          // Create edge to child
           const childId = getItemId(child, chartType);
-          allEdges.push({
-            id: `edge-${itemId}-${childId}`,
-            source: itemId,
-            target: childId,
-            type: 'smoothstep',
-            animated: false,
-            style: {
-              stroke: currentCardColors.borderColor,
-              strokeWidth: 4,
-              strokeDasharray: '0',
-            },
-            markerEnd: {
-              type: 'arrowclosed',
-              width: 20,
-              height: 20,
-              color: currentCardColors.borderColor,
-            },
-          });
+          
+          // Only create edge if child ID is different from parent ID
+          if (childId !== itemId) {
+            // Get current item's border color for the connection line
+            const currentCardColors = getItemColor(item, chartType);
+            
+            // Create edge to child
+            allEdges.push({
+              id: `edge-${itemId}-${childId}`,
+              source: itemId,
+              target: childId,
+              type: 'smoothstep',
+              animated: false,
+              style: {
+                stroke: currentCardColors.borderColor,
+                strokeWidth: 4,
+                strokeDasharray: '0',
+              },
+              markerEnd: {
+                type: 'arrowclosed',
+                width: 20,
+                height: 20,
+                color: currentCardColors.borderColor,
+              },
+            });
+          }
 
           // Process child recursively
           processItem(child, level + 1, x, index, item.children!.length, false);
