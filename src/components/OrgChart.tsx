@@ -27,13 +27,11 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
   const { fitView } = useReactFlow();
 
-  // Helper function to get item ID based on chart type
-  const getItemId = (item: any, type: 'orgChart' | 'companyChart'): string => {
-    if (type === 'orgChart') {
-      return item.job_title_code || item.id || item.name;
-    } else {
-      return item.id?.toString() || item.code || item.name;
-    }
+  // Helper function to generate unique ID for items based on their position in hierarchy
+  const generateItemId = (item: any, parentId: string = '', index: number = 0): string => {
+    // Use name + position in hierarchy to create unique ID
+    const baseName = item.name || `item-${index}`;
+    return parentId ? `${parentId}-${baseName}-${index}` : `root-${baseName}-${index}`;
   };
 
   // Update expanded nodes when data changes
@@ -42,9 +40,9 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
       const rootItems = Array.isArray(chartData) ? chartData : [chartData];
       const expandedIds = new Set<string>();
       
-      rootItems.forEach(item => {
+      rootItems.forEach((item, index) => {
         if (item.firstNode && item.expanded) {
-          const id = getItemId(item, chartType);
+          const id = generateItemId(item, '', index);
           expandedIds.add(id);
         }
       });
@@ -73,19 +71,19 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
 
     const handleExpandAll = () => {
       const allIds = new Set<string>();
-      const collectIds = (item: any) => {
-        const id = getItemId(item, chartType);
+      const collectIds = (item: any, parentId: string = '', index: number = 0) => {
+        const id = generateItemId(item, parentId, index);
         allIds.add(id);
         if (item.children) {
-          item.children.forEach(collectIds);
+          item.children.forEach((child: any, childIndex: number) => collectIds(child, id, childIndex));
         }
       };
       
       if (chartData) {
         if (Array.isArray(chartData)) {
-          chartData.forEach(collectIds);
+          chartData.forEach((item, index) => collectIds(item, '', index));
         } else {
-          collectIds(chartData);
+          collectIds(chartData, '', 0);
         }
       }
       setExpandedNodes(allIds);
@@ -98,18 +96,21 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
     const handleFocusOnEmployee = (event: CustomEvent) => {
       const { identifier } = event.detail;
       // Expand path to item
-      const expandPath = (item: any, targetId: string | number, path: string[] = []): string[] | null => {
-        const currentId = getItemId(item, chartType);
+      const expandPath = (item: any, targetId: string | number, path: string[] = [], parentId: string = '', index: number = 0): string[] | null => {
+        const currentId = generateItemId(item, parentId, index);
         const currentPath = [...path, currentId];
         
-        if (currentId === identifier.toString() || 
-            (chartType === 'orgChart' && item.job_title_code === identifier) ||
-            (chartType === 'companyChart' && item.id === identifier)) {
+        // Check if this is the target item by name or original identifiers
+        if (item.name === identifier.toString() || 
+            (item.job_title_code && item.job_title_code === identifier) ||
+            (item.id && item.id === identifier) ||
+            (item.code && item.code === identifier)) {
           return currentPath;
         }
         if (item.children) {
-          for (const child of item.children) {
-            const result = expandPath(child, targetId, currentPath);
+          for (let i = 0; i < item.children.length; i++) {
+            const child = item.children[i];
+            const result = expandPath(child, targetId, currentPath, currentId, i);
             if (result) return result;
           }
         }
@@ -120,12 +121,12 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
         let pathToItem: string[] | null = null;
         
         if (Array.isArray(chartData)) {
-          for (const item of chartData) {
-            pathToItem = expandPath(item, identifier);
+          for (let i = 0; i < chartData.length; i++) {
+            pathToItem = expandPath(chartData[i], identifier, [], '', i);
             if (pathToItem) break;
           }
         } else {
-          pathToItem = expandPath(chartData, identifier);
+          pathToItem = expandPath(chartData, identifier, [], '', 0);
         }
         
         if (pathToItem) {
@@ -155,10 +156,10 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
       window.removeEventListener('collapseAll', handleCollapseAll);
       window.removeEventListener('focusOnEmployee', handleFocusOnEmployee as EventListener);
     };
-  }, [chartData, chartType, fitView]);
+  }, [chartData, chartType, fitView, generateItemId]);
 
   const toggleExpand = useCallback((item: any) => {
-    const nodeId = getItemId(item, chartType);
+    const nodeId = item._generatedId; // Use the generated ID stored in item
     console.log('🔄 Toggling expand for node:', nodeId);
     setExpandedNodes(prev => {
       const newSet = new Set(prev);
@@ -181,7 +182,7 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
       console.log('📊 Expanded nodes:', Array.from(newSet));
       return newSet;
     });
-  }, [fitView, chartType]);
+  }, [fitView]);
 
   // Build nodes and edges
   const { nodes, edges } = useMemo(() => {
@@ -195,6 +196,7 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
     const allNodes: Node[] = [];
     const allEdges: Edge[] = [];
     const processedIds = new Set<string>();
+    const itemIdMap = new Map<any, string>(); // Map to store item -> generated ID
     
     // Helper function to get item color based on chart type
     const getItemColor = (item: any, type: 'orgChart' | 'companyChart') => {
@@ -217,30 +219,19 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
       }
     };
 
-    // Find all root items (items without parents)
-    const findRootItems = (data: any): any[] => {
-      if (Array.isArray(data)) {
-        return data.filter(item => item.firstNode || !hasParent(item, data));
-      } else {
-        return [data];
-      }
-    };
-    
-    // Check if an item has a parent in the data
-    const hasParent = (item: any, allData: any[]): boolean => {
-      const itemId = getItemId(item, chartType);
-      return allData.some(otherItem => 
-        otherItem.children && 
-        otherItem.children.some((child: any) => getItemId(child, chartType) === itemId)
-      );
-    };
-    
-    const rootItems = findRootItems(chartData);
+    // Find root items - items that are at the top level or marked as firstNode
+    const rootItems = Array.isArray(chartData) ? chartData : [chartData];
     console.log('🌳 Found root items:', rootItems.length);
     
     // Function to recursively process items
-    const processItem = (item: any, level: number, parentX: number = 0, siblingIndex: number = 0, totalSiblings: number = 1, isRoot: boolean = false) => {
-      const itemId = getItemId(item, chartType);
+    const processItem = (item: any, level: number, parentX: number = 0, siblingIndex: number = 0, totalSiblings: number = 1, isRoot: boolean = false, parentId: string = '') => {
+      // Generate unique ID based on hierarchy position
+      const itemId = generateItemId(item, parentId, siblingIndex);
+      
+      // Store the generated ID in the item for later use
+      item._generatedId = itemId;
+      itemIdMap.set(item, itemId);
+      
       if (processedIds.has(itemId)) return;
       processedIds.add(itemId);
 
@@ -293,50 +284,49 @@ const OrgChart: React.FC<OrgChartProps> = ({ chartData, chartType }) => {
       // Process children if expanded
       if (hasChildren && isExpanded && item.children) {
         item.children.forEach((child: any, index: number) => {
-          const childId = getItemId(child, chartType);
+          const childId = generateItemId(child, itemId, index);
+          child._generatedId = childId;
+          itemIdMap.set(child, childId);
           
-          // Only create edge if child ID is different from parent ID
-          if (childId !== itemId) {
-            // Get current item's border color for the connection line
-            const currentCardColors = getItemColor(item, chartType);
-            
-            // Create edge to child
-            allEdges.push({
-              id: `edge-${itemId}-${childId}`,
-              source: itemId,
-              target: childId,
-              type: 'smoothstep',
-              animated: false,
-              style: {
-                stroke: currentCardColors.borderColor,
-                strokeWidth: 4,
-                strokeDasharray: '0',
-              },
-              markerEnd: {
-                type: 'arrowclosed',
-                width: 20,
-                height: 20,
-                color: currentCardColors.borderColor,
-              },
-            });
-          }
+          // Get current item's border color for the connection line
+          const currentCardColors = getItemColor(item, chartType);
+          
+          // Create edge to child (parent -> child relationship)
+          allEdges.push({
+            id: `edge-${itemId}-${childId}`,
+            source: itemId,
+            target: childId,
+            type: 'smoothstep',
+            animated: false,
+            style: {
+              stroke: currentCardColors.borderColor,
+              strokeWidth: 4,
+              strokeDasharray: '0',
+            },
+            markerEnd: {
+              type: 'arrowclosed',
+              width: 20,
+              height: 20,
+              color: currentCardColors.borderColor,
+            },
+          });
 
           // Process child recursively
-          processItem(child, level + 1, x, index, item.children!.length, false);
+          processItem(child, level + 1, x, index, item.children!.length, false, itemId);
         });
       }
     };
 
     // Process all root items side by side
     rootItems.forEach((item, index) => {
-      processItem(item, 1, 0, index, rootItems.length, true);
+      processItem(item, 1, 0, index, rootItems.length, true, '');
     });
 
     console.log('📊 Generated nodes:', allNodes.length);
     console.log('🔗 Generated edges:', allEdges.length);
 
     return { nodes: allNodes, edges: allEdges };
-  }, [chartData, chartType, expandedNodes, toggleExpand]);
+  }, [chartData, chartType, expandedNodes, toggleExpand, generateItemId]);
 
   const [nodesState, setNodes, onNodesChange] = useNodesState([]);
   const [edgesState, setEdges, onEdgesChange] = useEdgesState([]);
