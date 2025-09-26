@@ -10,11 +10,11 @@ interface EmployeeCardProps {
   hasChildren: boolean;
 }
 
-const EmployeeCard: React.FC<EmployeeCardProps> = ({ 
-  employee, 
-  isExpanded, 
-  onToggleExpand, 
-  hasChildren 
+const EmployeeCard: React.FC<EmployeeCardProps> = ({
+  employee,
+  isExpanded,
+  onToggleExpand,
+  hasChildren
 }) => {
   const { color, bgColor } = getDepartmentColor(employee.department);
 
