@@ -46,10 +46,19 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
   // Get display information based on chart type
   const getDisplayInfo = () => {
     if (chartType === 'orgChart') {
+      // دعم جميع الأسماء المحتملة للكود
+      const code =
+        typeof item.jobTitleCode === 'number' && !isNaN(item.jobTitleCode)
+          ? item.jobTitleCode
+          : typeof item.job_title_code === 'number' && !isNaN(item.job_title_code)
+          ? item.job_title_code
+          : typeof item.code === 'number' && !isNaN(item.code)
+          ? item.code
+          : undefined;
       return {
         name: item.name,
         position: item.position,
-        code: item.job_title_code,
+        code,
         level: item.level || item.job_level
       };
     } else {
