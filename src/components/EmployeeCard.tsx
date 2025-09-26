@@ -10,11 +10,11 @@ interface EmployeeCardProps {
   hasChildren: boolean;
 }
 
-const EmployeeCard: React.FC<EmployeeCardProps> = ({ 
-  employee, 
-  isExpanded, 
-  onToggleExpand, 
-  hasChildren 
+const EmployeeCard: React.FC<EmployeeCardProps> = ({
+  employee,
+  isExpanded,
+  onToggleExpand,
+  hasChildren
 }) => {
   const { color, bgColor } = getDepartmentColor(employee.department);
 
@@ -36,7 +36,11 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
         {/* Employee Info */}
         <div className="text-center">
           <h3 className="text-base font-bold text-gray-900 mb-1 leading-tight">{employee.name}</h3>
-          <p className={`text-xs font-medium ${color} mb-3 leading-tight`}>{employee.position}</p>
+          <p className={`text-xs font-medium ${color} mb-1 leading-tight`}>{employee.position}</p>
+          {/* عرض كود المسمى الوظيفي */}
+          {employee.jobTitleCode !== undefined && (
+            <p className="text-[11px] text-gray-500 mb-3 leading-tight">كود الوظيفة: {employee.jobTitleCode}</p>
+          )}
 
           {/* Expand/Collapse Button */}
           {hasChildren && (
