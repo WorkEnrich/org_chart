@@ -37,10 +37,20 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
         <div className="text-center">
           <h3 className="text-base font-bold text-gray-900 mb-1 leading-tight">{employee.name}</h3>
           <p className={`text-xs font-medium ${color} mb-1 leading-tight`}>{employee.position}</p>
-          {/* عرض كود الوظيفة فقط إذا كان موجودًا وصحيح */}
-          {typeof employee.jobTitleCode === 'number' && !isNaN(employee.jobTitleCode) && (
-            <p className="text-[11px] text-gray-500 mb-3 leading-tight">كود الوظيفة: {employee.jobTitleCode}</p>
-          )}
+          {/* عرض كود الوظيفة من أي خاصية متاحة */}
+          {(() => {
+            const code =
+              typeof employee.jobTitleCode === 'number' && !isNaN(employee.jobTitleCode)
+                ? employee.jobTitleCode
+                : typeof (employee as any).job_title_code === 'number' && !isNaN((employee as any).job_title_code)
+                  ? (employee as any).job_title_code
+                  : typeof (employee as any).code === 'number' && !isNaN((employee as any).code)
+                    ? (employee as any).code
+                    : undefined;
+            return code !== undefined ? (
+              <p className="text-[11px] text-gray-500 mb-3 leading-tight">كود الوظيفة: {code}</p>
+            ) : null;
+          })()}
 
           {/* Expand/Collapse Button */}
           {hasChildren && (
