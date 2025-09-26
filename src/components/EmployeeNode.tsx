@@ -15,13 +15,13 @@ interface EmployeeNodeData {
 
 const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
   const { item, chartType, itemColors, hasChildren, isExpanded, onToggleExpand } = data;
-  
+
   // Get colors based on chart type
   const getItemColors = () => {
     if (itemColors) {
       return itemColors;
     }
-    
+
     if (chartType === 'orgChart') {
       let code;
       if (item.job_title_code) {
@@ -40,7 +40,7 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
       return getCardBorderColor(Math.abs(id), item.type || 'company');
     }
   };
-  
+
   const levelColors = getItemColors();
 
   // Get display information based on chart type
@@ -51,10 +51,10 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
         typeof item.jobTitleCode === 'number' && !isNaN(item.jobTitleCode)
           ? item.jobTitleCode
           : typeof item.job_title_code === 'number' && !isNaN(item.job_title_code)
-          ? item.job_title_code
-          : typeof item.code === 'number' && !isNaN(item.code)
-          ? item.code
-          : undefined;
+            ? item.job_title_code
+            : typeof item.code === 'number' && !isNaN(item.code)
+              ? item.code
+              : undefined;
       return {
         name: item.name,
         position: item.position,
@@ -64,17 +64,17 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
     } else {
       return {
         name: item.name,
-        position: item.type === 'company' ? `${item.number_employees} employees` : 
-                 item.type === 'branch' ? `Location: ${item.location}` :
-                 item.type === 'department' ? 'Department' :
-                 item.type === 'section' ? 'Section' :
-                 item.type === 'job_title' ? `Level: ${item.level}` : item.type,
+        position: item.type === 'company' ? `${item.number_employees} employees` :
+          item.type === 'branch' ? `Location: ${item.location}` :
+            item.type === 'department' ? 'Department' :
+              item.type === 'section' ? 'Section' :
+                item.type === 'job_title' ? `Level: ${item.level}` : item.type,
         code: item.code || item.id,
         level: item.type
       };
     }
   };
-  
+
   const displayInfo = getDisplayInfo();
 
   const handleExpandClick = (e: React.MouseEvent) => {
@@ -82,7 +82,7 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
     e.preventDefault();
     e.nativeEvent.stopImmediatePropagation();
     console.log('🖱️ Expand button clicked for:', displayInfo.name, 'Has children:', hasChildren, 'Current expanded:', isExpanded);
-    
+
     if (onToggleExpand && hasChildren) {
       console.log('🔄 Calling toggle function for:', displayInfo.code);
       onToggleExpand();
@@ -90,7 +90,7 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
   };
 
   return (
-    <div 
+    <div
       className={`relative bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border-2 ${levelColors.bgColor} w-64 group hover:-translate-y-1`}
       style={{ borderColor: levelColors.borderColor }}
       onMouseDown={(e) => {
@@ -134,14 +134,14 @@ const EmployeeNode: React.FC<NodeProps<EmployeeNodeData>> = ({ data }) => {
                 }}
                 className="flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 mx-auto border relative z-10"
                 style={{
-                  backgroundColor: isExpanded ? '#dcfce7' : 
+                  backgroundColor: isExpanded ? '#dcfce7' :
                     levelColors.bgColor.includes('purple') ? '#f3e8ff' :
-                    levelColors.bgColor.includes('blue') ? '#dbeafe' :
-                    levelColors.bgColor.includes('green') ? '#dcfce7' :
-                    levelColors.bgColor.includes('orange') ? '#fed7aa' :
-                    levelColors.bgColor.includes('red') ? '#fecaca' :
-                    levelColors.bgColor.includes('pink') ? '#fce7f3' :
-                    levelColors.bgColor.includes('indigo') ? '#e0e7ff' : '#f3f4f6',
+                      levelColors.bgColor.includes('blue') ? '#dbeafe' :
+                        levelColors.bgColor.includes('green') ? '#dcfce7' :
+                          levelColors.bgColor.includes('orange') ? '#fed7aa' :
+                            levelColors.bgColor.includes('red') ? '#fecaca' :
+                              levelColors.bgColor.includes('pink') ? '#fce7f3' :
+                                levelColors.bgColor.includes('indigo') ? '#e0e7ff' : '#f3f4f6',
                   color: isExpanded ? '#15803d' : levelColors.borderColor,
                   borderColor: levelColors.borderColor,
                   pointerEvents: 'auto'
@@ -176,7 +176,7 @@ declare global {
   }
 }
 
-String.prototype.hashCode = function() {
+String.prototype.hashCode = function () {
   let hash = 0;
   if (this.length === 0) return hash;
   for (let i = 0; i < this.length; i++) {
