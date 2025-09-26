@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مثال استخدام Organization Chart API</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .button:hover {
+            background: #0056b3;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏢 Organization Chart API - مثال الاستخدام</h1>
+        
+        <div id="status" class="status warning">
+            ⏳ جاري تحميل الـ API...
+        </div>
+
+        <div class="controls">
+            <button class="button" onclick="loadSampleData()">📊 تحميل بيانات تجريبية</button>
+            <button class="button" onclick="loadYourData()">👤 تحميل بياناتك</button>
+            <button class="button" onclick="expandAll()">📈 توسيع الكل</button>
+            <button class="button" onclick="collapseAll()">📉 طي الكل</button>
+            <button class="button" onclick="clearChart()">🗑️ مسح المخطط</button>
+        </div>
+
+        <h3>💡 الطريقة الصحيحة لاستخدام الـ API:</h3>
+        <div class="code-block">
+// ❌ خطأ - استخدام مباشر بدون انتظار
+window.OrgChartAPI.init({
+    name: 'Aya Emad',
+    position: 'CEO',
+    expanded: true,
+    children: [...]
+});
+
+// ✅ صحيح - انتظار جاهزية الـ API
+window.addEventListener('OrgChartReady', function() {
+    console.log('✅ API جاهز للاستخدام');
+    
+    window.OrgChartAPI.setData({
+        name: 'Aya Emad',
+        position: 'CEO',
+        expanded: true,
+        children: [
+            { name: 'Omar Tarek', position: 'CTO' },
+            { name: 'Nour Hany', position: 'CMO' }
+        ]
+    }, 'orgChart');
+});
+        </div>
+
+        <!-- تضمين الـ Organization Chart -->
+        <iframe src="/" id="orgChart"></iframe>
+    </div>
+
+    <script>
+        let apiReady = false;
+        let iframe = document.getElementById('orgChart');
+        
+        // انتظار تحميل الـ iframe
+        iframe.onload = function() {
+            console.log('📱 iframe loaded');
+            
+            // انتظار جاهزية الـ API
+            window.addEventListener('OrgChartReady', function() {
+                console.log('✅ Organization Chart API is ready!');
+                apiReady = true;
+                
+                document.getElementById('status').innerHTML = '✅ الـ API جاهز للاستخدام';
+                document.getElementById('status').className = 'status success';
+                
+                // تحميل البيانات التجريبية تلقائياً
+                setTimeout(() => {
+                    loadYourData();
+                }, 1000);
+            });
+            
+            // الاستماع لأحداث الـ API
+            window.addEventListener('OrgChartDataSet', function(e) {
+                console.log('📊 Data set successfully:', e.detail);
+                document.getElementById('status').innerHTML = `✅ تم تحميل البيانات بنجاح - ${e.detail.itemCount} عنصر`;
+                document.getElementById('status').className = 'status success';
+            });
+            
+            window.addEventListener('OrgChartCleared', function() {
+                console.log('🗑️ Chart cleared');
+                document.getElementById('status').innerHTML = '🗑️ تم مسح المخطط';
+                document.getElementById('status').className = 'status warning';
+            });
+        };
+        
+        // دالة تحميل البيانات التجريبية
+        function loadSampleData() {
+            if (!apiReady) {
+                alert('⚠️ الـ API لم يصبح جاهزاً بعد، يرجى الانتظار...');
+                return;
+            }
+            
+            console.log('📊 Loading sample data...');
+            
+            const sampleData = {
+                name: 'Sarah Ahmed',
+                position: 'Chief Executive Officer',
+                jobTitleCode: 1,
+                level: 'Executive',
+                expanded: true,
+                firstNode: true,
+                children: [
+                    {
+                        name: 'Michael Chen',
+                        position: 'Chief Technology Officer',
+                        jobTitleCode: 2,
+                        level: 'Senior Management',
+                        expanded: false,
+                        children: [
+                            {
+                                name: 'Ahmed Salem',
+                                position: 'Senior Developer',
+                                jobTitleCode: 3,
+                                level: 'Staff',
+                                expanded: false,
+                                children: []
+                            },
+                            {
+                                name: 'Fatima Ali',
+                                position: 'Frontend Developer',
+                                jobTitleCode: 4,
+                                level: 'Staff',
+                                expanded: false,
+                                children: []
+                            }
+                        ]
+                    },
+                    {
+                        name: 'Jennifer Davis',
+                        position: 'Chief Marketing Officer',
+                        jobTitleCode: 5,
+                        level: 'Senior Management',
+                        expanded: false,
+                        children: [
+                            {
+                                name: 'Omar Khaled',
+                                position: 'Marketing Manager',
+                                jobTitleCode: 6,
+                                level: 'Middle Management',
+                                expanded: false,
+                                children: []
+                            }
+                        ]
+                    }
+                ]
+            };
+            
+            window.OrgChartAPI.setData(sampleData, 'orgChart');
+        }
+        
+        // دالة تحميل بياناتك
+        function loadYourData() {
+            if (!apiReady) {
+                alert('⚠️ الـ API لم يصبح جاهزاً بعد، يرجى الانتظار...');
+                return;
+            }
+            
+            console.log('👤 Loading your data...');
+            
+            const yourData = {
+                name: 'Aya Emad',
+                position: 'CEO',
+                jobTitleCode: 1,
+                level: 'Executive',
+                expanded: true,
+                firstNode: true,
+                children: [
+                    {
+                        name: 'Omar Tarek',
+                        position: 'CTO',
+                        jobTitleCode: 2,
+                        level: 'Senior Management',
+                        expanded: false,
+                        children: []
+                    },
+                    {
+                        name: 'Nour Hany',
+                        position: 'CMO',
+                        jobTitleCode: 3,
+                        level: 'Senior Management',
+                        expanded: false,
+                        children: []
+                    }
+                ]
+            };
+            
+            window.OrgChartAPI.setData(yourData, 'orgChart');
+        }
+        
+        // دوال التحكم
+        function expandAll() {
+            if (!apiReady) {
+                alert('⚠️ الـ API لم يصبح جاهزاً بعد، يرجى الانتظار...');
+                return;
+            }
+            window.OrgChartAPI.expandAll();
+        }
+        
+        function collapseAll() {
+            if (!apiReady) {
+                alert('⚠️ الـ API لم يصبح جاهزاً بعد، يرجى الانتظار...');
+                return;
+            }
+            window.OrgChartAPI.collapseAll();
+        }
+        
+        function clearChart() {
+            if (!apiReady) {
+                alert('⚠️ الـ API لم يصبح جاهزاً بعد، يرجى الانتظار...');
+                return;
+            }
+            window.OrgChartAPI.clearChart();
+        }
+        
+        // مثال على كيفية استخدام الـ API في تطبيق حقيقي
+        function exampleUsageInRealApp() {
+            // في تطبيق React
+            /*
+            useEffect(() => {
+                const handleApiReady = () => {
+                    if (window.OrgChartAPI && employeeData.length > 0) {
+                        window.OrgChartAPI.setData(employeeData, 'orgChart');
+                    }
+                };
+                
+                window.addEventListener('OrgChartReady', handleApiReady);
+                
+                return () => {
+                    window.removeEventListener('OrgChartReady', handleApiReady);
+                };
+            }, [employeeData]);
+            */
+            
+            // في تطبيق Vue
+            /*
+            mounted() {
+                window.addEventListener('OrgChartReady', () => {
+                    if (window.OrgChartAPI && this.employees.length > 0) {
+                        window.OrgChartAPI.setData(this.employees, 'orgChart');
+                    }
+                });
+            }
+            */
+            
+            // في تطبيق عادي
+            /*
+            document.addEventListener('DOMContentLoaded', function() {
+                window.addEventListener('OrgChartReady', function() {
+                    fetch('/api/employees')
+                        .then(response => response.json())
+                        .then(data => {
+                            window.OrgChartAPI.setData(data, 'orgChart');
+                        });
+                });
+            });
+            */
+        }
+    </script>
+</body>
+</html>
